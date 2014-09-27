@@ -13,16 +13,23 @@
         android:id="@+id/edit_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="@dimen/padding_large"
         android:hint="@string/event_name"/>
 
     <Space
         android:layout_height="@dimen/padding_medium"
         android:layout_width="1dp"/>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@android:color/darker_gray"/>
+
     <Button
         android:id="@+id/button_positive"
-        android:layout_width="@dimen/button_width_min"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="@string/ok"/>
+        android:text="@string/ok"
+        style="?android:attr/borderlessButtonStyle"/>
 </LinearLayout>
