@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore the UnusedResources issue in the given files -->
+    <issue id="UnusedResources">
+        <ignore path="res/values/com_crashlitics_export_strings.xml"/>
+    </issue>
+
+    <issue id="HardcodedText" severity="error"/>
+</lint>
