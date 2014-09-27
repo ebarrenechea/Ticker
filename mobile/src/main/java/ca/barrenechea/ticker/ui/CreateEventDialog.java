@@ -31,7 +31,7 @@ import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.event.OnEventEdit;
 
-public class EditEventDialog extends BaseDialog {
+public class CreateEventDialog extends BaseDialog {
     private Event mEvent;
 
     @InjectView(R.id.edit_name)
@@ -41,7 +41,7 @@ public class EditEventDialog extends BaseDialog {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_edit_event, container, false);
+        View view = inflater.inflate(R.layout.dialog_create_event, container, false);
 
         ButterKnife.inject(this, view);
 
@@ -72,7 +72,7 @@ public class EditEventDialog extends BaseDialog {
             mEvent.setName(name);
 
             mBus.post(new OnEventEdit(mEvent));
-            EditEventDialog.this.dismiss();
+            CreateEventDialog.this.dismiss();
         });
 
         return view;

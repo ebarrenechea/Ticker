@@ -100,7 +100,7 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
         int id = item.getItemId();
         switch (id) {
             case R.id.action_add:
-                EditEventDialog d = new EditEventDialog();
+                CreateEventDialog d = new CreateEventDialog();
                 d.show(this.getFragmentManager(), "EditEvent");
                 return true;
 
