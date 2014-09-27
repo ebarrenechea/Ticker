@@ -30,6 +30,7 @@ import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.HistoryEntry;
+import ca.barrenechea.ticker.data.TimeSpan;
 import ca.barrenechea.ticker.utils.TimeUtils;
 
 public class HistoryAdapter extends BaseAdapter {
@@ -85,7 +86,7 @@ public class HistoryAdapter extends BaseAdapter {
         HistoryEntry entry = mEvent.getHistory().get(i);
         h.start.setText(DateUtils.formatDateTime(mContext, entry.getStart(), DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME));
 
-        TimeUtils.Span s = TimeUtils.getSpan(entry.getStart(), entry.getEnd());
+        TimeSpan s = TimeUtils.getSpan(entry.getStart(), entry.getEnd());
         h.end.setText(String.valueOf(s.days) + " days " + String.valueOf(s.hours) + ":" + String.valueOf(s.minutes));
 
         final String note = entry.getNote();
