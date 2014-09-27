@@ -29,6 +29,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
+import ca.barrenechea.ticker.data.TimeSpan;
 import ca.barrenechea.ticker.utils.TimeUtils;
 
 public class EventAdapter extends BaseAdapter {
@@ -81,7 +82,7 @@ public class EventAdapter extends BaseAdapter {
 
         Event e = this.getItem(i);
 
-        TimeUtils.Span s = TimeUtils.getCurrentSpan(e.getStarted());
+        TimeSpan s = TimeUtils.getCurrentSpan(e.getStarted());
 
         h.name.setText(e.getName());
         h.days.setText(String.valueOf(s.days));
