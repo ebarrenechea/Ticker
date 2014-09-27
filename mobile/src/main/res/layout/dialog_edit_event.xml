@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <Space
+        android:layout_height="@dimen/padding_medium"
+        android:layout_width="1dp"/>
+
+    <EditText
+        android:id="@+id/edit_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/event_name"/>
+
+    <Space
+        android:layout_height="@dimen/padding_medium"
+        android:layout_width="1dp"/>
+
+    <Button
+        android:id="@+id/button_positive"
+        android:layout_width="@dimen/button_width_min"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/ok"/>
+</LinearLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/action_add"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/add"/>
+
+    <item
+        android:orderInCategory="100"
+        android:title="@string/sort"
+        android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_sort">
+
+        <menu android:checkableBehavior="single">
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/sort_name_asc"
+                    android:title="@string/name_ascending"
+                    android:checked="true"/>
+                <item
+                    android:id="@+id/sort_name_desc"
+                    android:title="@string/name_descending"/>
+                <item
+                    android:id="@+id/sort_start_asc"
+                    android:title="@string/time_ascending"/>
+                <item
+                    android:id="@+id/sort_start_desc"
+                    android:title="@string/time_descending"/>
+            </group>
+        </menu>
+    </item>
+</menu>
