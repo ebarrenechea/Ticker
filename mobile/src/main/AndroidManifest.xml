@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     package="ca.barrenechea.ticker"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -23,9 +24,10 @@
 
         <activity
             android:name=".app.EventActivity"
-            android:parentActivityName=".app.MainActivity">
+            android:parentActivityName=".app.MainActivity"
+            tools:ignore="UnusedAttribute">
 
-            <meta-data
+        <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".app.MainActivity"/>
         </activity>

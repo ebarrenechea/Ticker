@@ -101,7 +101,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="No history found!"
+            android:text="@string/no_history_found"
             android:visibility="invisible"/>
 
     </FrameLayout>

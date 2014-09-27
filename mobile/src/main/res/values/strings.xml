@@ -4,7 +4,7 @@
     <string name="app_name">Ticker</string>
     <string name="add">Add</string>
     <string name="event_name">Event name</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="name_ascending">Name ascending</string>
     <string name="name_descending">Name descending</string>
     <string name="time_descending">Time descending</string>
@@ -16,5 +16,7 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="reset">Reset</string>
+    <string name="no_history_found">No history found!</string>
+    <string name="no_events">No events yet!</string>
 
 </resources>

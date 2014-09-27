@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="No events yet!"
+            android:text="@string/no_events"
             android:textAppearance="?android:attr/textAppearanceLarge"/>
     </LinearLayout>
 </RelativeLayout>
