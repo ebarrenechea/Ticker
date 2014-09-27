@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_reset"
+        android:title="@string/reset"
+        android:icon="@drawable/ic_action_reset"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_delete"
+        android:orderInCategory="200"
+        android:title="@string/delete"/>
+</menu>
