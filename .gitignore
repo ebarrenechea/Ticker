@@ -1,13 +1,13 @@
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
-/build
 
 # Android Studio
 .idea/
 .gradle
 gradle
-/*/build
 build
 *.iml
+
+# Release stuff
+*.keystore
+/*/crashlytics.properties
