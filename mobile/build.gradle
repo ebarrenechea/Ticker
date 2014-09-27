@@ -42,9 +42,9 @@ android {
     signingConfigs {
         release {
             storeFile file('../android.keystore')
-            storePassword "password"
-            keyAlias "alias"
-            keyPassword "password"
+            storePassword System.getProperty("spass")
+            keyAlias System.getProperty("alias")
+            keyPassword System.getProperty("kpass")
         }
     }
 
