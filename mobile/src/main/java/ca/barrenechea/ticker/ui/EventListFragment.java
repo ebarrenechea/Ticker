@@ -16,7 +16,13 @@
 
 package ca.barrenechea.ticker.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,7 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.view.ViewPropertyAnimator;
 
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -39,7 +45,6 @@ import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.rx.EventProvider;
-import ca.barrenechea.ticker.event.OnEventOpen;
 import ca.barrenechea.ticker.widget.EventAdapter;
 import rx.Observer;
 import rx.Subscription;
@@ -47,9 +52,17 @@ import rx.Subscription;
 public class EventListFragment extends BaseFragment implements Observer<List<Event>> {
 
     private static final String TAG = "EventListFragment";
+    private static final String NAME_ASC = "name COLLATE NOCASE ASC";
+    private static final String NAME_DESC = "name COLLATE NOCASE DESC";
+    private static final String STARTED_ASC = "started DESC"; // inverted because we want newest first
+    private static final String STARTED_DESC = "started ASC"; // inverted because we want oldest first
+    private static final int DURATION = 350;
+    private static final int INITIAL_LOAD_DELAY = 500; // data loads too fast and flashes the screen
 
     @InjectView(R.id.list)
-    ListView mListView;
+    RecyclerView mRecyclerView;
+    @InjectView(R.id.loading)
+    View mLoadingView;
     @InjectView(R.id.empty)
     View mEmptyView;
 
@@ -59,8 +72,7 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     private EventAdapter mAdapter;
     private Subscription mSubscription;
 
-    private String mSortColumn = "name";
-    private boolean mAscending = true;
+    private String mOrderBy = NAME_ASC;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,9 +88,10 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
         ButterKnife.inject(this, view);
 
         mAdapter = new EventAdapter(getActivity(), null);
-        mListView.setAdapter(mAdapter);
-        mListView.setEmptyView(mEmptyView);
-        mListView.setOnItemClickListener((adapterView, v, i, l) -> mBus.post(new OnEventOpen(mAdapter.getItem(i))));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false));
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         return view;
     }
@@ -121,23 +134,19 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     private void setSortStrategy(int id) {
         switch (id) {
             case R.id.sort_name_asc:
-                mSortColumn = "name";
-                mAscending = true;
+                mOrderBy = NAME_ASC;
                 break;
 
             case R.id.sort_name_desc:
-                mSortColumn = "name";
-                mAscending = false;
+                mOrderBy = NAME_DESC;
                 break;
 
             case R.id.sort_start_asc:
-                mSortColumn = "started";
-                mAscending = false;     // we want to see oldest last
+                mOrderBy = STARTED_ASC;
                 break;
 
             case R.id.sort_start_desc:
-                mSortColumn = "started";
-                mAscending = true;      // we want to see oldest first
+                mOrderBy = STARTED_DESC;
                 break;
         }
     }
@@ -146,7 +155,8 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     public void onResume() {
         super.onResume();
 
-        reloadData();
+        final Handler h = new Handler();
+        h.postDelayed(() -> reloadData(), INITIAL_LOAD_DELAY);
     }
 
     @Override
@@ -177,7 +187,7 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
 
     private PreparedQuery<Event> getQuery() throws SQLException {
         QueryBuilder<Event, Long> queryBuilder = mEventProvider.queryBuilder();
-        return queryBuilder.orderBy(mSortColumn, mAscending).prepare();
+        return queryBuilder.orderByRaw(mOrderBy).prepare();
     }
 
     @Override
@@ -192,6 +202,61 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
 
     @Override
     public void onNext(List<Event> events) {
-        mAdapter.setList(events);
+        if (events.size() > 0) {
+            mAdapter.setList(events);
+            showList();
+        } else {
+            showEmpty();
+        }
+    }
+
+    private void showList() {
+        if (mRecyclerView.getVisibility() == View.INVISIBLE) {
+            fadeIn(mRecyclerView);
+
+            if (mLoadingView.getVisibility() == View.VISIBLE) {
+                fadeOut(mLoadingView);
+            }
+
+            if (mEmptyView.getVisibility() == View.VISIBLE) {
+                fadeOut(mEmptyView);
+            }
+        }
+    }
+
+    private void showEmpty() {
+        if (mEmptyView.getVisibility() == View.INVISIBLE) {
+            fadeIn(mEmptyView);
+
+            if (mLoadingView.getVisibility() == View.VISIBLE) {
+                fadeOut(mLoadingView);
+            }
+
+            if (mRecyclerView.getVisibility() == View.VISIBLE) {
+                fadeOut(mRecyclerView);
+            }
+        }
+    }
+
+    private ViewPropertyAnimator fadeIn(final View view) {
+        view.setAlpha(0f);
+        view.setVisibility(View.VISIBLE);
+
+        return view.animate()
+                .alpha(1f)
+                .setDuration(DURATION)
+                .setListener(null);
+    }
+
+    private ViewPropertyAnimator fadeOut(final View view) {
+        return view.animate()
+                .alpha(0f)
+                .setDuration(DURATION)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        view.setVisibility(View.GONE);
+                    }
+                });
     }
 }

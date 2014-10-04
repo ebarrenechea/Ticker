@@ -17,10 +17,10 @@
 package ca.barrenechea.ticker.widget;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.List;
@@ -32,7 +32,7 @@ import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.TimeSpan;
 import ca.barrenechea.ticker.utils.TimeUtils;
 
-public class EventAdapter extends BaseAdapter {
+public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private LayoutInflater mInflater;
     private List<Event> mList;
@@ -48,51 +48,33 @@ public class EventAdapter extends BaseAdapter {
     }
 
     @Override
-    public int getCount() {
-        if (mList == null) {
-            return 0;
-        }
-
-        return mList.size();
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View view = mInflater.inflate(R.layout.adapter_item_event, viewGroup, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public Event getItem(int i) {
-        return mList.get(i);
+    public void onBindViewHolder(ViewHolder holder, int i) {
+        Event event = mList.get(i);
+
+        TimeSpan s = TimeUtils.getCurrentSpan(event.getStarted());
+
+        holder.name.setText(event.getName());
+        holder.days.setText(String.valueOf(s.days));
+        holder.time.setText(s.hours + ":" + (s.minutes < 10 ? "0" : "") + s.minutes);
+        holder.elapsed.setText(s.days + " days, " + s.hours + ":" + s.minutes);
     }
 
     @Override
-    public long getItemId(int i) {
-        return getItem(i).getId();
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        ViewHolder h = null;
-        if (view == null) {
-            view = mInflater.inflate(R.layout.adapter_item_event, viewGroup, false);
-
-            h = new ViewHolder(view);
-            view.setTag(h);
+    public int getItemCount() {
+        if (mList != null) {
+            return mList.size();
         }
 
-        if (h == null) {
-            h = (ViewHolder) view.getTag();
-        }
-
-        Event e = this.getItem(i);
-
-        TimeSpan s = TimeUtils.getCurrentSpan(e.getStarted());
-
-        h.name.setText(e.getName());
-        h.days.setText(String.valueOf(s.days));
-        h.time.setText(s.hours + ":" + (s.minutes < 10 ? "0" : "") + s.minutes);
-        h.elapsed.setText(s.days + " days, " + s.hours + ":" + s.minutes);
-
-        return view;
+        return 0;
     }
 
-    static class ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         @InjectView(R.id.text_name)
         TextView name;
         @InjectView(R.id.text_elapsed)
@@ -103,6 +85,8 @@ public class EventAdapter extends BaseAdapter {
         TextView time;
 
         public ViewHolder(View view) {
+            super(view);
+
             ButterKnife.inject(this, view);
         }
     }
