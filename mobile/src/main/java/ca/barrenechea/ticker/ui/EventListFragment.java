@@ -1,23 +1,23 @@
 /*
- * Copyright (C) 2014 Eduardo Barrenechea
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (C) 2014 Eduardo Barrenechea
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  * http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package ca.barrenechea.ticker.ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -30,7 +30,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -45,6 +44,7 @@ import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.rx.EventProvider;
+import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.EventAdapter;
 import rx.Observer;
 import rx.Subscription;
@@ -56,7 +56,6 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     private static final String NAME_DESC = "name COLLATE NOCASE DESC";
     private static final String STARTED_ASC = "started ASC";
     private static final String STARTED_DESC = "started DESC";
-    private static final int DURATION = 350;
     private static final int INITIAL_LOAD_DELAY = 500;
 
     @InjectView(R.id.list)
@@ -213,51 +212,29 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
 
     private void showList() {
         if (mRecyclerView.getVisibility() == View.INVISIBLE) {
-            fadeIn(mRecyclerView);
+            ViewUtils.fadeIn(mRecyclerView);
 
             if (mLoadingView.getVisibility() == View.VISIBLE) {
-                fadeOut(mLoadingView);
+                ViewUtils.fadeOut(mLoadingView);
             }
 
             if (mEmptyView.getVisibility() == View.VISIBLE) {
-                fadeOut(mEmptyView);
+                ViewUtils.fadeOut(mEmptyView);
             }
         }
     }
 
     private void showEmpty() {
         if (mEmptyView.getVisibility() == View.INVISIBLE) {
-            fadeIn(mEmptyView);
+            ViewUtils.fadeIn(mEmptyView);
 
             if (mLoadingView.getVisibility() == View.VISIBLE) {
-                fadeOut(mLoadingView);
+                ViewUtils.fadeOut(mLoadingView);
             }
 
             if (mRecyclerView.getVisibility() == View.VISIBLE) {
-                fadeOut(mRecyclerView);
+                ViewUtils.fadeOut(mRecyclerView);
             }
         }
-    }
-
-    private ViewPropertyAnimator fadeIn(final View view) {
-        view.setAlpha(0f);
-        view.setVisibility(View.VISIBLE);
-
-        return view.animate()
-                .alpha(1f)
-                .setDuration(DURATION)
-                .setListener(null);
-    }
-
-    private ViewPropertyAnimator fadeOut(final View view) {
-        return view.animate()
-                .alpha(0f)
-                .setDuration(DURATION)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        view.setVisibility(View.GONE);
-                    }
-                });
     }
 }
