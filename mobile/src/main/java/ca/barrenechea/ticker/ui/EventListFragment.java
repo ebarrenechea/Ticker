@@ -86,12 +86,6 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
 
         ButterKnife.inject(this, view);
 
-        mAdapter = new EventAdapter(getActivity(), null);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false));
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
         return view;
     }
 
@@ -100,6 +94,17 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
         super.onDestroyView();
 
         ButterKnife.reset(this);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mAdapter = new EventAdapter(getActivity(), null, mBus);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false));
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
     @Override
