@@ -57,7 +57,7 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     private static final String STARTED_ASC = "started ASC";
     private static final String STARTED_DESC = "started DESC";
     private static final int DURATION = 350;
-    private static final int INITIAL_LOAD_DELAY = 500; // data loads too fast and flashes the screen
+    private static final int INITIAL_LOAD_DELAY = 500;
 
     @InjectView(R.id.list)
     RecyclerView mRecyclerView;
@@ -155,6 +155,7 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     public void onResume() {
         super.onResume();
 
+        // data loads too fast and flashes the screen
         final Handler h = new Handler();
         h.postDelayed(() -> reloadData(), INITIAL_LOAD_DELAY);
     }

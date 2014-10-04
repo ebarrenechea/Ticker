@@ -5,10 +5,10 @@
     <string name="add">Add</string>
     <string name="event_name">Event name</string>
     <string name="ok">OK</string>
-    <string name="name_ascending">Name ascending</string>
-    <string name="name_descending">Name descending</string>
-    <string name="time_descending">Time descending</string>
-    <string name="time_ascending">Time ascending</string>
+    <string name="name_ascending">Name A-Z</string>
+    <string name="name_descending">Name Z-A</string>
+    <string name="time_descending">Newest first</string>
+    <string name="time_ascending">Oldest first</string>
     <string name="sort">Sort</string>
     <string name="note">Note</string>
     <string name="name">Name</string>
