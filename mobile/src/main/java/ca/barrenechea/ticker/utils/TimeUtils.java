@@ -30,6 +30,10 @@ public class TimeUtils {
     }
 
     public static TimeSpan getSpan(long start, long end) {
+        if (end <= start) {
+            return new TimeSpan(0, 0, 0);
+        }
+
         Interval interval = new Interval(start, end);
 
         Days days = Days.daysIn(interval);
