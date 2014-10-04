@@ -54,8 +54,8 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     private static final String TAG = "EventListFragment";
     private static final String NAME_ASC = "name COLLATE NOCASE ASC";
     private static final String NAME_DESC = "name COLLATE NOCASE DESC";
-    private static final String STARTED_ASC = "started DESC"; // inverted because we want newest first
-    private static final String STARTED_DESC = "started ASC"; // inverted because we want oldest first
+    private static final String STARTED_ASC = "started ASC";
+    private static final String STARTED_DESC = "started DESC";
     private static final int DURATION = 350;
     private static final int INITIAL_LOAD_DELAY = 500; // data loads too fast and flashes the screen
 
