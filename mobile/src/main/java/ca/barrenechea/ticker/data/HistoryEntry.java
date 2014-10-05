@@ -1,33 +1,39 @@
 /*
- * Copyright (C) 2014 Eduardo Barrenechea
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (C) 2014 Eduardo Barrenechea
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  * http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package ca.barrenechea.ticker.data;
 
-public class HistoryEntry {
+import io.realm.RealmObject;
+
+public class HistoryEntry extends RealmObject {
     private long start;
     private long end;
     private String note;
 
-    HistoryEntry() {
-        // gson
+    public void setStart(long start) {
+        this.start = start;
     }
 
-    public HistoryEntry(long start, long end, String note) {
-        this.start = start;
+    public void setEnd(long end) {
         this.end = end;
+    }
+
+    public void setNote(String note) {
         this.note = note;
     }
 

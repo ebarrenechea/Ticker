@@ -27,8 +27,6 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
@@ -36,34 +34,34 @@ import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.TimeSpan;
 import ca.barrenechea.ticker.event.OnEventOpen;
 import ca.barrenechea.ticker.utils.TimeUtils;
+import io.realm.RealmResults;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private LayoutInflater mInflater;
-    private List<Event> mList;
+    private RealmResults<Event> mData;
     private Bus mBus;
 
-    public EventAdapter(Context context, List<Event> list, Bus bus) {
+    public EventAdapter(Context context, Bus bus) {
         mInflater = LayoutInflater.from(context);
-        mList = list;
         mBus = bus;
     }
 
-    public void setList(List<Event> list) {
-        mList = list;
+    public void setData(RealmResults<Event> data) {
+        mData = data;
         this.notifyDataSetChanged();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View view = mInflater.inflate(R.layout.adapter_item_event, viewGroup, false);
-        view.setOnClickListener(v -> mBus.post(new OnEventOpen(mList.get(i))));
+        view.setOnClickListener(v -> mBus.post(new OnEventOpen(mData.get(i))));
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int i) {
-        Event event = mList.get(i);
+        Event event = mData.get(i);
 
         TimeSpan s = TimeUtils.getCurrentSpan(event.getStarted());
 
@@ -75,8 +73,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        if (mList != null) {
-            return mList.size();
+        if (mData != null) {
+            return mData.size();
         }
 
         return 0;

@@ -1,17 +1,19 @@
 /*
- * Copyright (C) 2014 Eduardo Barrenechea
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (C) 2014 Eduardo Barrenechea
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  * http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package ca.barrenechea.ticker.ui;
@@ -42,14 +44,16 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
-import ca.barrenechea.ticker.data.rx.EventProvider;
+import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.event.OnEventDelete;
 import ca.barrenechea.ticker.event.OnEventEdit;
 import ca.barrenechea.ticker.widget.HistoryAdapter;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import rx.Observer;
 import rx.Subscription;
 
-public class EventFragment extends BaseFragment implements Observer<Event> {
+public class EventFragment extends BaseFragment implements Observer<RealmResults<Event>> {
 
     private static final String TAG = "EventFragment";
 
@@ -77,9 +81,9 @@ public class EventFragment extends BaseFragment implements Observer<Event> {
     View mEmptyView;
 
     @Inject
-    EventProvider mEventProvider;
+    EventLoader mEventLoader;
 
-    private long mId;
+    private String mId;
     private boolean mIsDirty = false;
 
     private HistoryAdapter mAdapter;
@@ -148,9 +152,9 @@ public class EventFragment extends BaseFragment implements Observer<Event> {
         }
     };
 
-    public static EventFragment newInstance(long id) {
+    public static EventFragment newInstance(String id) {
         Bundle args = new Bundle();
-        args.putLong(KEY_ID, id);
+        args.putString(KEY_ID, id);
 
         EventFragment f = new EventFragment();
         f.setArguments(args);
@@ -167,7 +171,7 @@ public class EventFragment extends BaseFragment implements Observer<Event> {
             throw new IllegalArgumentException("Event id cannot be null!");
         }
 
-        mId = args.getLong(KEY_ID, Event.INVALID_ID);
+        mId = args.getString(KEY_ID);
 
         this.setHasOptionsMenu(true);
     }
@@ -209,7 +213,7 @@ public class EventFragment extends BaseFragment implements Observer<Event> {
                 return true;
 
             case R.id.action_reset:
-                mEvent.reset();
+//                mEvent.reset();
                 mIsDirty = true;
                 bindEventData();
                 return true;
@@ -279,7 +283,8 @@ public class EventFragment extends BaseFragment implements Observer<Event> {
     }
 
     private void registerEvent() {
-        mSubscription = mEventProvider.queryForId(mId).subscribe(this);
+        RealmQuery<Event> query = mEventLoader.getQuery();
+        mSubscription = mEventLoader.load(query.equalTo("id", mId)).subscribe(this);
     }
 
     @Override
@@ -333,11 +338,11 @@ public class EventFragment extends BaseFragment implements Observer<Event> {
     }
 
     @Override
-    public void onNext(Event event) {
-        if (event != null) {
-            mEvent = event;
+    public void onNext(RealmResults<Event> result) {
+        if (result != null) {
+            mEvent = result.first();
             bindEventData();
-            mAdapter.setEvent(event);
+            mAdapter.setEvent(mEvent);
         }
     }
 

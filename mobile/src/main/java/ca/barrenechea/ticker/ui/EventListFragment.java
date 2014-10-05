@@ -31,31 +31,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
-
-import java.sql.SQLException;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
-import ca.barrenechea.ticker.data.rx.EventProvider;
+import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.EventAdapter;
+import io.realm.RealmResults;
 import rx.Observer;
 import rx.Subscription;
 
-public class EventListFragment extends BaseFragment implements Observer<List<Event>> {
+public class EventListFragment extends BaseFragment implements Observer<RealmResults<Event>> {
 
     private static final String TAG = "EventListFragment";
-    private static final String NAME_ASC = "name COLLATE NOCASE ASC";
-    private static final String NAME_DESC = "name COLLATE NOCASE DESC";
-    private static final String STARTED_ASC = "started ASC";
-    private static final String STARTED_DESC = "started DESC";
     private static final int INITIAL_LOAD_DELAY = 500;
 
     @InjectView(R.id.list)
@@ -66,12 +57,10 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     View mEmptyView;
 
     @Inject
-    EventProvider mEventProvider;
+    EventLoader mEventLoader;
 
-    private EventAdapter mAdapter;
     private Subscription mSubscription;
-
-    private String mOrderBy = NAME_ASC;
+    private EventAdapter mAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,7 +89,7 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mAdapter = new EventAdapter(getActivity(), null, mBus);
+        mAdapter = new EventAdapter(getActivity(), mBus);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false));
@@ -138,19 +127,15 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     private void setSortStrategy(int id) {
         switch (id) {
             case R.id.sort_name_asc:
-                mOrderBy = NAME_ASC;
                 break;
 
             case R.id.sort_name_desc:
-                mOrderBy = NAME_DESC;
                 break;
 
             case R.id.sort_start_asc:
-                mOrderBy = STARTED_ASC;
                 break;
 
             case R.id.sort_start_desc:
-                mOrderBy = STARTED_DESC;
                 break;
         }
     }
@@ -172,27 +157,15 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     }
 
     private void reloadData() {
-        try {
-            PreparedQuery<Event> query = getQuery();
-
-            resetSubscription();
-
-            mSubscription = mEventProvider.query(query).subscribe(this);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        mSubscription = mEventLoader.loadAll().subscribe(this);
     }
 
     private void resetSubscription() {
-        if (mSubscription != null) {
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
             mSubscription.unsubscribe();
-            mSubscription = null;
         }
-    }
 
-    private PreparedQuery<Event> getQuery() throws SQLException {
-        QueryBuilder<Event, Long> queryBuilder = mEventProvider.queryBuilder();
-        return queryBuilder.orderByRaw(mOrderBy).prepare();
+        mSubscription = null;
     }
 
     @Override
@@ -206,9 +179,9 @@ public class EventListFragment extends BaseFragment implements Observer<List<Eve
     }
 
     @Override
-    public void onNext(List<Event> events) {
-        if (events.size() > 0) {
-            mAdapter.setList(events);
+    public void onNext(RealmResults<Event> results) {
+        if (results.size() > 0) {
+            mAdapter.setData(results);
             showList();
         } else {
             showEmpty();

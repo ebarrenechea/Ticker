@@ -1,17 +1,19 @@
 /*
- * Copyright (C) 2014 Eduardo Barrenechea
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (C) 2014 Eduardo Barrenechea
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  * http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package ca.barrenechea.ticker.app;
@@ -50,7 +52,7 @@ public class EventActivity extends BaseActivity {
         Fragment f = manager.findFragmentById(R.id.frame_content);
 
         if (f == null) {
-            f = EventFragment.newInstance(getIntent().getLongExtra(KEY_ID, 0));
+            f = EventFragment.newInstance(getIntent().getStringExtra(KEY_ID));
             manager.beginTransaction().add(R.id.frame_content, f).commit();
         }
     }
