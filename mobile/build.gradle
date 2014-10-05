@@ -84,25 +84,23 @@ dependencies {
     wearApp project(':wear')
 
     //noinspection GradleDynamicVersion
+    compile 'com.google.android.gms:play-services-wearable:+'
+    //noinspection GradleDynamicVersion
     compile 'com.android.support:recyclerview-v7:21.+'
-
     //noinspection GradleDynamicVersion
     compile 'com.android.support:cardview-v7:21.+'
+    //noinspection GradleDynamicVersion
+    compile 'com.crashlytics.android:crashlytics:1.+'
 
     compile 'com.squareup:otto:1.3.5'
     compile 'com.squareup.dagger:dagger:1.2.2'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
-
     compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'com.jakewharton:butterknife:5.1.2'
-
     compile 'io.reactivex:rxandroid:0.21.0'
     compile 'com.google.code.gson:gson:2.3'
     compile 'net.danlew:android.joda:2.4.0'
 
-    //noinspection GradleDynamicVersion
-    compile 'com.google.android.gms:play-services-wearable:+'
-
-    //noinspection GradleDynamicVersion
-    compile 'com.crashlytics.android:crashlytics:1.+'
+    compile files('libs/realm-0.70.1.jar')
+    provided files('libs/realm-annotations-processor-0.70.1.jar')
 }

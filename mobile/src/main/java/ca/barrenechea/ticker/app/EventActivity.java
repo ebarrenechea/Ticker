@@ -51,7 +51,7 @@ public class EventActivity extends BaseActivity {
         Fragment f = manager.findFragmentById(R.id.frame_content);
 
         if (f == null) {
-            f = EventFragment.newInstance(getIntent().getLongExtra(KEY_ID, 0));
+            f = EventFragment.newInstance(getIntent().getStringExtra(KEY_ID));
             manager.beginTransaction().add(R.id.frame_content, f).commit();
         }
     }

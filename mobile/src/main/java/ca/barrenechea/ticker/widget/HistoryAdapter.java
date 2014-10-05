@@ -1,17 +1,19 @@
 /*
- * Copyright (C) 2014 Eduardo Barrenechea
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (C) 2014 Eduardo Barrenechea
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  * http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package ca.barrenechea.ticker.widget;
@@ -53,7 +55,7 @@ public class HistoryAdapter extends BaseAdapter {
     @Override
     public int getCount() {
         if (mEvent != null) {
-            return mEvent.getHistorySize();
+            return mEvent.getListHistory().size();
         } else {
             return 0;
         }
@@ -61,12 +63,12 @@ public class HistoryAdapter extends BaseAdapter {
 
     @Override
     public HistoryEntry getItem(int i) {
-        return mEvent.getHistory().get(i);
+        return mEvent.getListHistory().get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return mEvent.getHistory().get(i).getStart();
+        return mEvent.getListHistory().get(i).getStart();
     }
 
     @Override
@@ -83,7 +85,7 @@ public class HistoryAdapter extends BaseAdapter {
             h = (ViewHolder) view.getTag();
         }
 
-        HistoryEntry entry = mEvent.getHistory().get(i);
+        HistoryEntry entry = mEvent.getListHistory().get(i);
         h.start.setText(DateUtils.formatDateTime(mContext, entry.getStart(), DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME));
 
         TimeSpan s = TimeUtils.getSpan(entry.getStart(), entry.getEnd());
