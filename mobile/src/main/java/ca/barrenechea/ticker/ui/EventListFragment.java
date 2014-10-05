@@ -111,32 +111,29 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
                 return true;
 
             case R.id.sort_name_asc:
+                // string sorting not supported yet
+//                mAdapter.sortBy("name", RealmResults.SORT_ORDER_ASCENDING);
+//                item.setChecked(true);
+                return true;
+
             case R.id.sort_name_desc:
+                // string sorting not supported yet
+//                mAdapter.sortBy("name", RealmResults.SORT_ORDER_DECENDING);
+//                item.setChecked(true);
+                return true;
+
             case R.id.sort_start_asc:
-            case R.id.sort_start_desc:
-                setSortStrategy(id);
+                mAdapter.sortBy("started", RealmResults.SORT_ORDER_ASCENDING);
                 item.setChecked(true);
-                reloadData();
+                return true;
+
+            case R.id.sort_start_desc:
+                mAdapter.sortBy("started", RealmResults.SORT_ORDER_DECENDING);
+                item.setChecked(true);
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void setSortStrategy(int id) {
-        switch (id) {
-            case R.id.sort_name_asc:
-                break;
-
-            case R.id.sort_name_desc:
-                break;
-
-            case R.id.sort_start_asc:
-                break;
-
-            case R.id.sort_start_desc:
-                break;
         }
     }
 
@@ -157,6 +154,7 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     }
 
     private void reloadData() {
+        resetSubscription();
         mSubscription = mEventLoader.loadAll().subscribe(this);
     }
 

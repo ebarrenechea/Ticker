@@ -57,6 +57,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         this.notifyDataSetChanged();
     }
 
+    public void sortBy(String column, boolean ascending) {
+        if (mData != null) {
+            mData = mData.sort(column, ascending);
+            this.notifyDataSetChanged();
+        }
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int type) {
         final View view = mInflater.inflate(R.layout.adapter_item_event, viewGroup, false);
@@ -66,6 +73,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             final Event event = mData.get(holder.getPosition());
             mBus.post(new OnEventView(event));
         });
+
+//        view.setOnLongClickListener(v -> {
+//            final Event event = mData.get(holder.getPosition());
+//            mBus.post(new OnEventSelect(event));
+//        });
 
         return holder;
     }
