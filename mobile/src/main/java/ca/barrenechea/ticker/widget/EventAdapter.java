@@ -20,6 +20,7 @@ package ca.barrenechea.ticker.widget;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +39,16 @@ import io.realm.RealmResults;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
+    private static final int FLAGS = DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
+
     private LayoutInflater mInflater;
     private RealmResults<Event> mData;
+    private Context mContext;
     private Bus mBus;
 
     public EventAdapter(Context context, Bus bus) {
         mInflater = LayoutInflater.from(context);
+        mContext = context;
         mBus = bus;
     }
 
@@ -53,10 +58,16 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = mInflater.inflate(R.layout.adapter_item_event, viewGroup, false);
-        view.setOnClickListener(v -> mBus.post(new OnEventView(mData.get(i))));
-        return new ViewHolder(view);
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int type) {
+        final View view = mInflater.inflate(R.layout.adapter_item_event, viewGroup, false);
+        final ViewHolder holder = new ViewHolder(view);
+
+        view.setOnClickListener(v -> {
+            final Event event = mData.get(holder.getPosition());
+            mBus.post(new OnEventView(event));
+        });
+
+        return holder;
     }
 
     @Override
@@ -68,7 +79,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         holder.name.setText(event.getName());
         holder.days.setText(String.valueOf(s.days));
         holder.time.setText(s.hours + ":" + (s.minutes < 10 ? "0" : "") + s.minutes);
-        holder.elapsed.setText(s.days + " days, " + s.hours + ":" + s.minutes);
+        holder.date.setText(DateUtils.formatDateTime(mContext, event.getStarted(), FLAGS));
     }
 
     @Override
@@ -83,8 +94,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         @InjectView(R.id.text_name)
         TextView name;
-        @InjectView(R.id.text_elapsed)
-        TextView elapsed;
+        @InjectView(R.id.text_date)
+        TextView date;
         @InjectView(R.id.text_days)
         TextView days;
         @InjectView(R.id.text_time)
