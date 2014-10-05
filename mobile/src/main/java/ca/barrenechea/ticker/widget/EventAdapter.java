@@ -71,7 +71,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
         view.setOnClickListener(v -> {
             final Event event = mData.get(holder.getPosition());
-            mBus.post(new OnEventView(event));
+            mBus.post(new OnEventView(event.getId()));
         });
 
 //        view.setOnLongClickListener(v -> {

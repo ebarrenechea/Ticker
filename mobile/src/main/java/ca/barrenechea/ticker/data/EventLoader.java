@@ -113,8 +113,7 @@ public class EventLoader implements RealmChangeListener {
     @Subscribe
     public void notify(OnEventDelete e) {
         Observable.create(f -> {
-            final RealmResults<Event> results = mRealm.where(Event.class).equalTo("id", e.event.getId()).findAll();
-
+            final RealmResults<Event> results = mRealm.where(Event.class).equalTo("id", e.id).findAll();
             mRealm.beginTransaction();
             results.clear();
             mRealm.commitTransaction();

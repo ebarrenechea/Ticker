@@ -49,8 +49,8 @@ public class MainActivity extends BaseActivity {
     public void notify(OnEventView e) {
         Intent intent = new Intent(this, EventActivity.class);
 
-        if (e.event != null) {
-            intent.putExtra(EventActivity.KEY_ID, e.event.getId());
+        if (e.id != null) {
+            intent.putExtra(EventActivity.KEY_ID, e.id);
         }
 
         this.startActivity(intent);

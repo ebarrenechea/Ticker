@@ -18,12 +18,10 @@
 
 package ca.barrenechea.ticker.event;
 
-import ca.barrenechea.ticker.data.Event;
-
 public class OnEventView {
-    public final Event event;
+    public final String id;
 
-    public OnEventView(Event event) {
-        this.event = event;
+    public OnEventView(String id) {
+        this.id = id;
     }
 }

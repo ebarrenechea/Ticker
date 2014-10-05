@@ -209,10 +209,11 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
-                mBus.post(new OnEventDelete(mEvent));
+                mBus.post(new OnEventDelete(mEvent.getId()));
                 return true;
 
             case R.id.action_reset:
+                //TODO: re-enable event reset
 //                mEvent.reset();
                 mIsDirty = true;
                 bindEventData();
@@ -294,7 +295,7 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
         resetSubscription();
 
         if (mIsDirty) {
-            mBus.post(new OnEventEdit(mEvent));
+            mBus.post(new OnEventEdit(mEvent.getId()));
             mIsDirty = false;
         }
     }
@@ -311,7 +312,7 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
 
         mEvent.setName(name.toString());
         mEvent.setNote(note.toString());
-        mBus.post(new OnEventEdit(mEvent));
+        mBus.post(new OnEventEdit(mEvent.getId()));
 
         return true;
     }
