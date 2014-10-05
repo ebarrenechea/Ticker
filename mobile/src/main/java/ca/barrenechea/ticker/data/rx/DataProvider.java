@@ -76,8 +76,6 @@ public class DataProvider<T> {
     public Observable<T> queryForId(final long id) {
         final BehaviorSubject<Void> queryHolder = BehaviorSubject.create();
         return queryHolder
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(Schedulers.io())
                 .map(o -> mDao.queryForId(id))
                 .doOnSubscribe(() -> {
                     mSubjectList.add(queryHolder);
@@ -85,14 +83,13 @@ public class DataProvider<T> {
                 })
                 .doOnUnsubscribe(() -> mSubjectList.remove(queryHolder))
                 .asObservable()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<List<T>> query(final PreparedQuery<T> query) {
         final BehaviorSubject<Void> queryHolder = BehaviorSubject.create();
         return queryHolder
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(Schedulers.io())
                 .map(o -> mDao.query(query))
                 .doOnSubscribe(() -> {
                     mSubjectList.add(queryHolder);
@@ -100,6 +97,7 @@ public class DataProvider<T> {
                 })
                 .doOnUnsubscribe(() -> mSubjectList.remove(queryHolder))
                 .asObservable()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

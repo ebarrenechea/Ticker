@@ -16,6 +16,7 @@
 
 package ca.barrenechea.ticker.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -25,6 +26,7 @@ import javax.inject.Inject;
 
 import ca.barrenechea.ticker.TickerApp;
 
+@SuppressLint("Registered")
 public class BaseActivity extends Activity {
 
     @Inject

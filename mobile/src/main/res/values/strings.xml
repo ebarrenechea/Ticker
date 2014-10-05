@@ -4,11 +4,11 @@
     <string name="app_name">Ticker</string>
     <string name="add">Add</string>
     <string name="event_name">Event name</string>
-    <string name="ok">Ok</string>
-    <string name="name_ascending">Name ascending</string>
-    <string name="name_descending">Name descending</string>
-    <string name="time_descending">Time descending</string>
-    <string name="time_ascending">Time ascending</string>
+    <string name="ok">OK</string>
+    <string name="name_ascending">Name A-Z</string>
+    <string name="name_descending">Name Z-A</string>
+    <string name="time_descending">Newest first</string>
+    <string name="time_ascending">Oldest first</string>
     <string name="sort">Sort</string>
     <string name="note">Note</string>
     <string name="name">Name</string>
@@ -16,5 +16,7 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="reset">Reset</string>
+    <string name="no_history_found">No history found!</string>
+    <string name="no_events">No events yet!</string>
 
 </resources>
