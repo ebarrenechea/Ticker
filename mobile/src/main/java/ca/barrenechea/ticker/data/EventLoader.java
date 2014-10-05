@@ -20,13 +20,18 @@ package ca.barrenechea.ticker.data;
 
 import android.text.TextUtils;
 
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
 import org.joda.time.DateTime;
 
 import java.util.LinkedList;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import ca.barrenechea.ticker.event.OnEventDelete;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmQuery;
@@ -43,10 +48,12 @@ public class EventLoader implements RealmChangeListener {
     private LinkedList<BehaviorSubject<Void>> mSubjectList;
 
     @Inject
-    public EventLoader(Realm realm) {
+    public EventLoader(Realm realm, Bus bus) {
         mRealm = realm;
         mRealm.addChangeListener(this);
         mSubjectList = new LinkedList<>();
+
+        bus.register(this);
     }
 
     public RealmQuery<Event> getQuery() {
@@ -82,6 +89,7 @@ public class EventLoader implements RealmChangeListener {
             mRealm.beginTransaction();
 
             final Event e = mRealm.createObject(Event.class);
+            e.setId(UUID.randomUUID().toString());
             e.setName(name);
 
             if (!TextUtils.isEmpty(note)) {
@@ -100,5 +108,16 @@ public class EventLoader implements RealmChangeListener {
     @Override
     public void onChange() {
         notifyObservers();
+    }
+
+    @Subscribe
+    public void notify(OnEventDelete e) {
+        Observable.create(f -> {
+            final RealmResults<Event> results = mRealm.where(Event.class).equalTo("id", e.event.getId()).findAll();
+
+            mRealm.beginTransaction();
+            results.clear();
+            mRealm.commitTransaction();
+        }).subscribeOn(Schedulers.io()).subscribe();
     }
 }

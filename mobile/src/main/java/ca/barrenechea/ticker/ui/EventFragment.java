@@ -283,8 +283,8 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
     }
 
     private void registerEvent() {
-        RealmQuery<Event> query = mEventLoader.getQuery();
-        mSubscription = mEventLoader.load(query.equalTo("id", mId)).subscribe(this);
+        RealmQuery<Event> query = mEventLoader.getQuery().equalTo("id", mId);
+        mSubscription = mEventLoader.load(query).subscribe(this);
     }
 
     @Override
