@@ -18,8 +18,6 @@
 
 package ca.barrenechea.ticker.data;
 
-import java.util.UUID;
-
 import io.realm.RealmList;
 import io.realm.RealmObject;
 
@@ -32,12 +30,8 @@ public class Event extends RealmObject {
     private String note;
     private RealmList<HistoryEntry> listHistory;
 
-    public Event() {
-        id = UUID.randomUUID().toString();
-    }
-
-    protected void setId(String ignored) {
-        // do nothing
+    protected void setId(String id) {
+        this.id = id;
     }
 
     public String getId() {
