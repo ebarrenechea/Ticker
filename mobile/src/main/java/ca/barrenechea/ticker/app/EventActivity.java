@@ -22,7 +22,6 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -70,6 +69,6 @@ public class EventActivity extends BaseActivity {
     @Subscribe
     public void notify(OnEventDelete e) {
         Toast.makeText(this, "Event deleted", Toast.LENGTH_SHORT).show();
-        NavUtils.navigateUpFromSameTask(this);
+        this.finish();
     }
 }
