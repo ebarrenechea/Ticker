@@ -32,7 +32,7 @@ import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.TimeSpan;
-import ca.barrenechea.ticker.event.OnEventOpen;
+import ca.barrenechea.ticker.event.OnEventView;
 import ca.barrenechea.ticker.utils.TimeUtils;
 import io.realm.RealmResults;
 
@@ -55,7 +55,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View view = mInflater.inflate(R.layout.adapter_item_event, viewGroup, false);
-        view.setOnClickListener(v -> mBus.post(new OnEventOpen(mData.get(i))));
+        view.setOnClickListener(v -> mBus.post(new OnEventView(mData.get(i))));
         return new ViewHolder(view);
     }
 
