@@ -31,6 +31,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
+import android.widget.TextView;
+
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -57,6 +60,8 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     View mLoadingView;
     @InjectView(R.id.empty)
     View mEmptyView;
+    @InjectView(R.id.text_empty)
+    TextView mTextEmpty;
 
     @Inject
     EventLoader mEventLoader;
@@ -231,6 +236,13 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     }
 
     private void showEmpty() {
+        if (mSearchView.isIconified()) {
+            mTextEmpty.setText(R.string.no_events);
+        } else {
+            final String msg = String.format(Locale.getDefault(), this.getString(R.string.nothing_found), mSearchView.getQuery());
+            mTextEmpty.setText(msg);
+        }
+
         if (mEmptyView.getVisibility() == View.INVISIBLE) {
             ViewUtils.fadeIn(mEmptyView);
 

@@ -36,6 +36,7 @@
     <string name="reset">Reset</string>
     <string name="no_history_found">No history found!</string>
     <string name="no_events">No events yet!</string>
+    <string name="nothing_found">No matches for \'%s\'</string>
     <string name="changes_discarded">Changes discarded</string>
     <string name="event_not_saved">Event not saved</string>
     <string name="event_saved">Event saved</string>
