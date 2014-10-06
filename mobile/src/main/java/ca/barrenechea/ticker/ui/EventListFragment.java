@@ -30,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import javax.inject.Inject;
 
@@ -40,6 +41,7 @@ import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.EventAdapter;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import rx.Observer;
 import rx.Subscription;
@@ -61,6 +63,7 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
 
     private Subscription mSubscription;
     private EventAdapter mAdapter;
+    private SearchView mSearchView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,6 +102,29 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_list_event, menu);
+
+        // Get the SearchView and set the searchable configuration
+//        SearchManager searchManager = (SearchManager) this.getActivity().getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                search(s);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                search(s);
+                return true;
+            }
+
+            private void search(String s) {
+                final RealmQuery<Event> query = mEventLoader.getQuery();
+                reloadData(query.contains("name", s));
+            }
+        });
+
     }
 
     @Override
@@ -143,7 +169,7 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
 
         // data loads too fast and flashes the screen
         final Handler h = new Handler();
-        h.postDelayed(() -> reloadData(), INITIAL_LOAD_DELAY);
+        h.postDelayed(() -> reloadData(null), INITIAL_LOAD_DELAY);
     }
 
     @Override
@@ -153,9 +179,13 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
         resetSubscription();
     }
 
-    private void reloadData() {
+    private void reloadData(RealmQuery<Event> query) {
         resetSubscription();
-        mSubscription = mEventLoader.loadAll().subscribe(this);
+        if (query == null) {
+            query = mEventLoader.getQuery();
+        }
+
+        mSubscription = mEventLoader.load(query).subscribe(this);
     }
 
     private void resetSubscription() {

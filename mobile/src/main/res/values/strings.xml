@@ -42,5 +42,6 @@
     <string name="event_created">Event created</string>
     <string name="event_not_created">Event not created</string>
     <string name="create_event">Create Event</string>
+    <string name="search_events">Search events</string>
 
 </resources>
