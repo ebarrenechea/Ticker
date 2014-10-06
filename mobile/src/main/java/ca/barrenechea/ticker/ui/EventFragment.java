@@ -47,6 +47,7 @@ import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.event.OnEventDelete;
 import ca.barrenechea.ticker.event.OnEventEdit;
+import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.HistoryAdapter;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
@@ -132,23 +133,25 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
         public void onDestroyActionMode(ActionMode actionMode) {
             mActionMode = null;
 
-            String message = null;
+            int message = 0;
             switch (mEditState) {
                 case FAILURE:
-                    message = "Invalid changes discarded.";
+                    message = R.string.event_not_saved;
                     resetForm();
                     break;
                 case CANCELLED:
-                    message = "Edit cancelled.";
+                    message = R.string.changes_discarded;
                     resetForm();
                     break;
                 case SUCCESS:
-                    message = "Changes saved.";
+                    message = R.string.event_saved;
                     break;
             }
 
             Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
             transitionViews(false);
+
+            ViewUtils.hideSoftInput(mEditName);
         }
     };
 
