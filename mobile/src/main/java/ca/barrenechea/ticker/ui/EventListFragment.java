@@ -108,8 +108,6 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_list_event, menu);
 
-        // Get the SearchView and set the searchable configuration
-//        SearchManager searchManager = (SearchManager) this.getActivity().getSystemService(Context.SEARCH_SERVICE);
         mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
