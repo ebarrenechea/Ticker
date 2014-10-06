@@ -20,8 +20,10 @@ package ca.barrenechea.ticker.utils;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.inputmethod.InputMethodManager;
 
 public class ViewUtils {
 
@@ -47,5 +49,10 @@ public class ViewUtils {
                 .alpha(1f)
                 .setDuration(DURATION)
                 .setListener(null);
+    }
+
+    public static void hideSoftInput(View view) {
+        final InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
