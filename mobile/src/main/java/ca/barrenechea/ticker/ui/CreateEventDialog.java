@@ -19,13 +19,17 @@
 package ca.barrenechea.ticker.ui;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import javax.inject.Inject;
 
@@ -33,8 +37,11 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.EventLoader;
+import ca.barrenechea.ticker.utils.ViewUtils;
 
 public class CreateEventDialog extends BaseDialog {
+    private static final int ANIMATION_DELAY = 325;
+
     @InjectView(R.id.edit_name)
     EditText mEditName;
     @InjectView(R.id.button_positive)
@@ -66,16 +73,37 @@ public class CreateEventDialog extends BaseDialog {
             }
         });
 
-        mButtonPositive.setEnabled(false);
-        mButtonPositive.setOnClickListener(v -> {
-            final String name = mEditName.getText().toString();
-
-            mEventLoader.create(name, null);
-
-            CreateEventDialog.this.dismiss();
+        mEditName.setOnEditorActionListener((textView, action, keyEvent) -> {
+            if (action == EditorInfo.IME_ACTION_DONE) {
+                create();
+                return true;
+            }
+            return false;
         });
 
+        mButtonPositive.setEnabled(false);
+        mButtonPositive.setOnClickListener(v -> create());
+
         return view;
+    }
+
+    private void create() {
+        ViewUtils.hideSoftInput(mEditName);
+
+        // wait for keyboard to dismiss
+        final Handler h = new Handler();
+        h.postDelayed(() -> {
+            final String name = mEditName.getText().toString();
+
+            if (!TextUtils.isEmpty(name)) {
+                mEventLoader.create(name, null);
+                Toast.makeText(this.getActivity(), R.string.event_created, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this.getActivity(), R.string.event_not_created, Toast.LENGTH_SHORT).show();
+            }
+
+            dismiss();
+        }, ANIMATION_DELAY);
     }
 
     @Override
