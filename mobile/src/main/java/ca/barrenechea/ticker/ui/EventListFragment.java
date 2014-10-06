@@ -142,10 +142,8 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
         super.onResume();
 
         // data loads too fast and flashes the screen
-        if (mAdapter.getItemCount() < 1) {
-            final Handler h = new Handler();
-            h.postDelayed(() -> reloadData(), INITIAL_LOAD_DELAY);
-        }
+        final Handler h = new Handler();
+        h.postDelayed(() -> reloadData(), INITIAL_LOAD_DELAY);
     }
 
     @Override
