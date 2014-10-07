@@ -55,11 +55,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         this.notifyDataSetChanged();
     }
 
-    public void sortBy(String column, boolean ascending) {
-        if (mData != null) {
-            mData = mData.sort(column, ascending);
-            this.notifyDataSetChanged();
-        }
+    public RealmResults<Event> getData() {
+        return mData;
     }
 
     @Override
