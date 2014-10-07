@@ -17,10 +17,10 @@
 package ca.barrenechea.ticker.ui;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +28,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import java.util.Locale;
@@ -42,10 +41,14 @@ import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.EventAdapter;
+import ca.barrenechea.ticker.widget.SearchView;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
+import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class EventListFragment extends BaseFragment implements Observer<RealmResults<Event>> {
 
@@ -126,6 +129,17 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
             }
         });
 
+        mSearchView.setOnExpandCollapseListener(new SearchView.OnExpandCollapseListener() {
+            @Override
+            public void onExpand() {
+                resetEmptyText();
+            }
+
+            @Override
+            public void onCollapse() {
+                resetEmptyText();
+            }
+        });
     }
 
     @Override
@@ -150,12 +164,12 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
                 return true;
 
             case R.id.sort_start_asc:
-                mAdapter.sortBy("started", RealmResults.SORT_ORDER_ASCENDING);
+                sortBy("started", RealmResults.SORT_ORDER_ASCENDING);
                 item.setChecked(true);
                 return true;
 
             case R.id.sort_start_desc:
-                mAdapter.sortBy("started", RealmResults.SORT_ORDER_DECENDING);
+                sortBy("started", RealmResults.SORT_ORDER_DECENDING);
                 item.setChecked(true);
                 return true;
 
@@ -164,13 +178,24 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
         }
     }
 
+    private void sortBy(String column, boolean ascending) {
+        Observable
+                .create(s -> {
+                    RealmResults<Event> data = mAdapter.getData();
+                    if (data != null) {
+                        s.onNext(data.sort(column, ascending));
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(d -> mAdapter.setData((RealmResults<Event>) d))
+                .subscribe();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-
-        // data loads too fast and flashes the screen
-        final Handler h = new Handler();
-        h.postDelayed(() -> reloadData(null), INITIAL_LOAD_DELAY);
+        reloadData(null);
     }
 
     @Override
@@ -232,12 +257,7 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     }
 
     private void showEmpty() {
-        if (mSearchView.isIconified()) {
-            mTextEmpty.setText(R.string.no_events);
-        } else {
-            final String msg = String.format(Locale.getDefault(), this.getString(R.string.nothing_found), mSearchView.getQuery());
-            mTextEmpty.setText(msg);
-        }
+        resetEmptyText();
 
         if (mEmptyView.getVisibility() == View.INVISIBLE) {
             ViewUtils.fadeIn(mEmptyView);
@@ -248,6 +268,21 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
 
             if (mRecyclerView.getVisibility() == View.VISIBLE) {
                 ViewUtils.fadeOut(mRecyclerView);
+            }
+        }
+    }
+
+    private void resetEmptyText() {
+        if (mSearchView == null || mSearchView.isIconified()) {
+            mTextEmpty.setText(R.string.no_events);
+        } else {
+            final CharSequence search = mSearchView.getQuery();
+
+            if (TextUtils.isEmpty(search)) {
+                mTextEmpty.setText(R.string.empty_search);
+            } else {
+                final String msg = String.format(Locale.getDefault(), this.getString(R.string.nothing_found), search);
+                mTextEmpty.setText(msg);
             }
         }
     }
