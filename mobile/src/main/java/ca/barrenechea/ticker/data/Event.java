@@ -18,9 +18,18 @@ package ca.barrenechea.ticker.data;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.Index;
 
 public class Event extends RealmObject {
+    @Ignore
+    public static final String COLUMN_NAME = "name";
+    @Ignore
+    public static final String COLUMN_START = "started";
+
+    @Index
     private String id;
+    @Index
     private String name;
     private long created;
     private long updated;
@@ -28,7 +37,7 @@ public class Event extends RealmObject {
     private String note;
     private RealmList<HistoryEntry> listHistory;
 
-    protected void setId(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
