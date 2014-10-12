@@ -53,7 +53,7 @@ import rx.schedulers.Schedulers;
 public class EventListFragment extends BaseFragment implements Observer<RealmResults<Event>> {
 
     private static final String TAG = "EventListFragment";
-    private static final int INITIAL_LOAD_DELAY = 500;
+//    private static final int INITIAL_LOAD_DELAY = 500;
 
     @InjectView(R.id.list)
     RecyclerView mRecyclerView;
@@ -151,25 +151,18 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
                 d.show(this.getFragmentManager(), "EditEvent");
                 return true;
 
-            case R.id.sort_name_asc:
-                // string sorting not supported yet
-//                mAdapter.sortBy("name", RealmResults.SORT_ORDER_ASCENDING);
-//                item.setChecked(true);
-                return true;
-
-            case R.id.sort_name_desc:
-                // string sorting not supported yet
-//                mAdapter.sortBy("name", RealmResults.SORT_ORDER_DECENDING);
-//                item.setChecked(true);
+            case R.id.sort_name:
+                sortBy(Event.COLUMN_NAME, RealmResults.SORT_ORDER_ASCENDING);
+                item.setChecked(true);
                 return true;
 
             case R.id.sort_start_asc:
-                sortBy("started", RealmResults.SORT_ORDER_ASCENDING);
+                sortBy(Event.COLUMN_START, RealmResults.SORT_ORDER_ASCENDING);
                 item.setChecked(true);
                 return true;
 
             case R.id.sort_start_desc:
-                sortBy("started", RealmResults.SORT_ORDER_DECENDING);
+                sortBy(Event.COLUMN_START, RealmResults.SORT_ORDER_DECENDING);
                 item.setChecked(true);
                 return true;
 
@@ -179,9 +172,9 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     }
 
     private void sortBy(String column, boolean ascending) {
+        final RealmResults<Event> data = mAdapter.getData();
         Observable
                 .create(s -> {
-                    RealmResults<Event> data = mAdapter.getData();
                     if (data != null) {
                         s.onNext(data.sort(column, ascending));
                     }

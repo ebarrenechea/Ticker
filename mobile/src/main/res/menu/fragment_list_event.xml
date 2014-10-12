@@ -42,12 +42,8 @@
         <menu android:checkableBehavior="single">
             <group android:checkableBehavior="single">
                 <item
-                    android:id="@+id/sort_name_asc"
-                    android:title="@string/name_ascending"
-                    android:checked="true"/>
-                <item
-                    android:id="@+id/sort_name_desc"
-                    android:title="@string/name_descending"/>
+                    android:id="@+id/sort_name"
+                    android:title="@string/name"/>
                 <item
                     android:id="@+id/sort_start_asc"
                     android:title="@string/time_ascending"/>
