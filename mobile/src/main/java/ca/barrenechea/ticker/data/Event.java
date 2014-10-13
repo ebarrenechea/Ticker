@@ -32,7 +32,6 @@ public class Event extends RealmObject {
     @Index
     private String name;
     private long created;
-    private long updated;
     private long started = -1;
     private String note;
     private RealmList<HistoryEntry> listHistory;
@@ -53,20 +52,8 @@ public class Event extends RealmObject {
         this.name = name;
     }
 
-    public long getCreated() {
-        return created;
-    }
-
     public void setCreated(long created) {
         this.created = created;
-    }
-
-    public long getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(long updated) {
-        this.updated = updated;
     }
 
     public long getStarted() {
