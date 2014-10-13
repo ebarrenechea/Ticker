@@ -42,9 +42,6 @@
         <menu android:checkableBehavior="single">
             <group android:checkableBehavior="single">
                 <item
-                    android:id="@+id/sort_name"
-                    android:title="@string/name"/>
-                <item
                     android:id="@+id/sort_start_asc"
                     android:title="@string/time_ascending"/>
                 <item

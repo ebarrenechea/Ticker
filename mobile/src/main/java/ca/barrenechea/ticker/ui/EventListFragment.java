@@ -151,11 +151,6 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
                 d.show(this.getFragmentManager(), "EditEvent");
                 return true;
 
-            case R.id.sort_name:
-                sortBy(Event.COLUMN_NAME, RealmResults.SORT_ORDER_ASCENDING);
-                item.setChecked(true);
-                return true;
-
             case R.id.sort_start_asc:
                 sortBy(Event.COLUMN_START, RealmResults.SORT_ORDER_ASCENDING);
                 item.setChecked(true);
@@ -175,7 +170,7 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
         final RealmResults<Event> data = mAdapter.getData();
         Observable
                 .create(s -> {
-                    if (data != null) {
+                    if (data != null && data.size() > 0) {
                         s.onNext(data.sort(column, ascending));
                     }
                 })
