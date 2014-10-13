@@ -20,7 +20,9 @@ import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.Index;
+import io.realm.annotations.RealmClass;
 
+@RealmClass
 public class Event extends RealmObject {
     @Ignore
     public static final String COLUMN_NAME = "name";
@@ -50,6 +52,10 @@ public class Event extends RealmObject {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public long getCreated() {
+        return created;
     }
 
     public void setCreated(long created) {
