@@ -16,15 +16,17 @@
 
 package ca.barrenechea.ticker.app;
 
-import android.app.ActionBar;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.event.OnEventDelete;
 import ca.barrenechea.ticker.ui.EventFragment;
@@ -33,19 +35,23 @@ public class EventActivity extends BaseActivity {
 
     public static final String KEY_ID = "EventActivity.Event.Id";
 
+    @InjectView(R.id.toolbar)
+    Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_event);
 
-        ActionBar actionBar = this.getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        ButterKnife.inject(this);
 
-        FragmentManager manager = this.getFragmentManager();
+        mToolbar.setNavigationIcon(R.drawable.ic_navigation_back);
+        mToolbar.setNavigationOnClickListener(v -> finish());
+
+        this.setSupportActionBar(mToolbar);
+
+        FragmentManager manager = this.getSupportFragmentManager();
         Fragment f = manager.findFragmentById(R.id.frame_content);
 
         if (f == null) {

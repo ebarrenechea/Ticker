@@ -47,13 +47,13 @@ retrolambda {
 
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion "20.0.0"
+    compileSdkVersion 21
+    buildToolsVersion "21.0.0"
 
     defaultConfig {
         applicationId "ca.barrenechea.ticker"
         minSdkVersion 15
-        targetSdkVersion 20
+        targetSdkVersion 21
         versionCode 2
         versionName "0.1"
     }
@@ -95,10 +95,15 @@ dependencies {
 
     //noinspection GradleDynamicVersion
     compile 'com.google.android.gms:play-services-wearable:+'
+
     //noinspection GradleDynamicVersion
-    compile 'com.android.support:recyclerview-v7:21.+'
+    compile 'com.android.support:support-v4:21.0.+'
     //noinspection GradleDynamicVersion
-    compile 'com.android.support:cardview-v7:21.+'
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    //noinspection GradleDynamicVersion
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+    //noinspection GradleDynamicVersion
+    compile 'com.android.support:cardview-v7:21.0.+'
     //noinspection GradleDynamicVersion
     compile 'com.crashlytics.android:crashlytics:1.+'
 

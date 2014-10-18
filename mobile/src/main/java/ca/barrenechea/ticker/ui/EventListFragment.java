@@ -17,9 +17,11 @@
 package ca.barrenechea.ticker.ui;
 
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,7 +43,6 @@ import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.EventAdapter;
-import ca.barrenechea.ticker.widget.SearchView;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import rx.Observable;
@@ -53,7 +54,6 @@ import rx.schedulers.Schedulers;
 public class EventListFragment extends BaseFragment implements Observer<RealmResults<Event>> {
 
     private static final String TAG = "EventListFragment";
-//    private static final int INITIAL_LOAD_DELAY = 500;
 
     @InjectView(R.id.list)
     RecyclerView mRecyclerView;
@@ -109,37 +109,42 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_list_event, menu);
 
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                search(s);
-                return true;
-            }
+        MenuItem search = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(search);
+        if (mSearchView != null) {
+            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String s) {
+                    search(s);
+                    return true;
+                }
 
-            @Override
-            public boolean onQueryTextChange(String s) {
-                search(s);
-                return true;
-            }
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    search(s);
+                    return true;
+                }
 
-            private void search(String s) {
-                final RealmQuery<Event> query = mEventLoader.getQuery();
-                reloadData(query.contains("name", s));
-            }
-        });
+                private void search(String s) {
+                    final RealmQuery<Event> query = mEventLoader.getQuery();
+                    reloadData(query.contains("name", s));
+                }
+            });
 
-        mSearchView.setOnExpandCollapseListener(new SearchView.OnExpandCollapseListener() {
-            @Override
-            public void onExpand() {
-                resetEmptyText();
-            }
+            MenuItemCompat.setOnActionExpandListener(search, new MenuItemCompat.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                    resetEmptyText();
+                    return true;
+                }
 
-            @Override
-            public void onCollapse() {
-                resetEmptyText();
-            }
-        });
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                    resetEmptyText();
+                    return true;
+                }
+            });
+        }
     }
 
     @Override
