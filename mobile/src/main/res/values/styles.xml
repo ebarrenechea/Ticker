@@ -17,8 +17,8 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- colorPrimary is used for the default action bar background -->
+    <style name="Ticker" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- colorPrimary is used for the default action bar background -->
         <item name="colorPrimary">#556677</item>
 
         <!-- colorPrimaryDark is used for the status bar -->
@@ -27,7 +27,17 @@
         <!-- colorAccent is used as the default value for colorControlActivated
              which is used to tint widgets -->
         <item name="colorAccent">#665544</item>
-
     </style>
+
+    <style name="Ticker.Widget"/>
+
+    <style name="Ticker.Widget.Base"/>
+
+    <style name="Ticker.Widget.Base.CardView">
+        <item name="android:layout_gravity">center</item>
+        <item name="cardCornerRadius">@dimen/cardview_corner_radius</item>
+    </style>
+
+    <style name="Ticker.Widget.CardView" parent="Ticker.Widget.Base.CardView"/>
 
 </resources>

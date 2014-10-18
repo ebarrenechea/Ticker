@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2014 Eduardo Barrenechea
   ~
@@ -15,17 +16,8 @@
   -->
 
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="dialog_width">300dp</dimen>
-    
-    <dimen name="padding_small">4dp</dimen>
-    <dimen name="padding_medium">8dp</dimen>
-    <dimen name="padding_large">12dp</dimen>
-    <!--<dimen name="padding_larger">16dp</dimen>-->
-    <!--<dimen name="padding_largest">32dp</dimen>-->
-
-    <dimen name="cardview_corner_radius">1dp</dimen>
+    <style name="Ticker.Widget.CardVew" parent="Ticker.Widget.Base.CardView">
+        <item name="android:elevation">5dp</item>
+    </style>
 </resources>
