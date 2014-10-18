@@ -36,23 +36,23 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import javax.inject.Inject;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
-import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.event.OnEventDelete;
 import ca.barrenechea.ticker.event.OnEventEdit;
 import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.HistoryAdapter;
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import rx.Observer;
-import rx.Subscription;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
-public class EventFragment extends BaseFragment implements Observer<RealmResults<Event>> {
+public class EventFragment extends BaseFragment implements RealmChangeListener {
 
     private static final String TAG = "EventFragment";
 
@@ -79,15 +79,11 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
     @InjectView(R.id.empty)
     View mEmptyView;
 
-    @Inject
-    EventLoader mEventLoader;
-
     private String mId;
     private boolean mIsDirty = false;
 
     private HistoryAdapter mAdapter;
     private Event mEvent;
-    private Subscription mSubscription;
     private ActionMode mActionMode;
     private ActionMode.Callback mCallback = new ActionMode.Callback() {
 
@@ -229,15 +225,25 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
     public void onResume() {
         super.onResume();
 
-        resetSubscription();
-        registerEvent();
+        loadData();
+        Realm.getInstance(this.getActivity()).addChangeListener(this);
     }
 
-    private void resetSubscription() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
-            mSubscription = null;
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        Realm.getInstance(this.getActivity()).removeChangeListener(this);
+
+        if (mIsDirty) {
+            mBus.post(new OnEventEdit(mEvent.getId()));
+            mIsDirty = false;
         }
+    }
+
+    @Override
+    public void onChange() {
+        loadData();
     }
 
     private void startEdit(View view) {
@@ -284,21 +290,29 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
         set.start();
     }
 
-    private void registerEvent() {
-        RealmQuery<Event> query = mEventLoader.getQuery().equalTo("id", mId);
-        mSubscription = mEventLoader.load(query).subscribe(this);
-    }
+    private void loadData() {
+        Observable.create(
+                subscriber -> {
+                    final Realm realm = Realm.getInstance(this.getActivity());
+                    RealmQuery<Event> query = realm.where(Event.class).equalTo(Event.COLUMN_ID, mId);
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        resetSubscription();
-
-        if (mIsDirty) {
-            mBus.post(new OnEventEdit(mEvent.getId()));
-            mIsDirty = false;
-        }
+                    subscriber.onNext(query.findAll());
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(t -> Log.e(TAG, "Error loading event.", t))
+                .doOnNext(
+                        o -> {
+                            if (o instanceof RealmResults) {
+                                final Object item = ((RealmResults) o).first();
+                                if (item instanceof Event) {
+                                    mEvent = (Event) item;
+                                    bindEventData();
+                                    mAdapter.setEvent(mEvent);
+                                }
+                            }
+                        })
+                .subscribe();
     }
 
     private boolean saveEdit() {
@@ -325,25 +339,6 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
         if (!TextUtils.isEmpty(note)) {
             mEditNote.setText("");
             mEditNote.append(note);
-        }
-    }
-
-    @Override
-    public void onCompleted() {
-        // do nothing
-    }
-
-    @Override
-    public void onError(Throwable e) {
-        Log.e(TAG, "Error loading data!", e);
-    }
-
-    @Override
-    public void onNext(RealmResults<Event> result) {
-        if (result != null) {
-            mEvent = result.first();
-            bindEventData();
-            mAdapter.setEvent(mEvent);
         }
     }
 

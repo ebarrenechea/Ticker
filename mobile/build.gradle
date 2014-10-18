@@ -23,7 +23,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:2.3.1'
+        classpath 'me.tatarka:gradle-retrolambda:2.4.0'
         //noinspection GradleDynamicVersion
         classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
     }
@@ -42,7 +42,7 @@ retrolambda {
 //    jdk System.getenv("JAVA8_HOME")
 //    oldJdk System.getenv("JAVA6_HOME")
 //    javaVersion JavaVersion.VERSION_1_6
-    incremental false
+//    incremental false
 }
 
 
