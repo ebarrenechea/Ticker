@@ -96,7 +96,6 @@ public class EventLoader implements RealmChangeListener {
 
             long milli = new DateTime().withMillisOfSecond(0).getMillis();
             e.setCreated(milli);
-            e.setUpdated(milli);
             e.setStarted(milli);
 
             mRealm.commitTransaction();

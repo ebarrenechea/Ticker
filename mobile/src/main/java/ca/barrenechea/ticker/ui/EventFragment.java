@@ -302,7 +302,6 @@ public class EventFragment extends BaseFragment implements Observer<RealmResults
     }
 
     private boolean saveEdit() {
-        // we still don't have an id to listen to changes on save
         final CharSequence name = mEditName.getText();
         final CharSequence note = mEditNote.getText();
 
