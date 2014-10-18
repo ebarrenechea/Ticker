@@ -121,16 +121,14 @@ public class CreateEventDialog extends BaseDialog {
                         .doOnError(t -> Log.e(TAG, "Error creating event.", t))
                         .doOnCompleted(
                                 () -> {
-                                    this.dismiss();
                                     Toast.makeText(this.getActivity(), R.string.event_created, Toast.LENGTH_SHORT).show();
+                                    this.dismiss();
                                 }
                         )
                         .subscribe();
             } else {
                 Toast.makeText(this.getActivity(), R.string.event_not_created, Toast.LENGTH_SHORT).show();
             }
-
-            dismiss();
         }, ANIMATION_DELAY);
     }
 
