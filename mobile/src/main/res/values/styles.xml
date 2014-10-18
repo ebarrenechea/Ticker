@@ -17,29 +17,24 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="Ticker" parent="Theme.AppCompat.Light.NoActionBar">
-    <!-- colorPrimary is used for the default action bar background -->
-        <item name="colorPrimary">@color/primary</item>
+    <style name="Base" parent="Theme.AppCompat.Light.NoActionBar"/>
 
-        <!-- colorPrimaryDark is used for the status bar -->
-        <item name="colorPrimaryDark">@color/primary_dark</item>
-
-        <!-- colorAccent is used as the default value for colorControlActivated
-             which is used to tint widgets -->
-        <item name="colorAccent">@color/accent</item>
-
-        <item name="colorControlHighlight">@color/accent</item>
-    </style>
-
-    <style name="Ticker.Widget"/>
-
-    <style name="Ticker.Widget.Base"/>
-
-    <style name="Ticker.Widget.Base.CardView">
+    <style name="Base.CardView" parent="CardView.Light">
         <item name="android:layout_gravity">center</item>
         <item name="cardCornerRadius">@dimen/cardview_corner_radius</item>
+        <item name="cardElevation">@dimen/cardview_elevation</item>
+        <item name="cardPreventCornerOverlap">true</item>
+        <item name="cardUseCompatPadding">true</item>
     </style>
 
-    <style name="Ticker.Widget.CardView" parent="Ticker.Widget.Base.CardView"/>
+    <style name="Ticker" parent="Base">
+        <item name="colorPrimary">@color/ticker_primary</item>
+        <item name="colorPrimaryDark">@color/ticker_primary_dark</item>
+        <item name="colorAccent">@color/ticker_accent</item>
 
+        <item name="colorControlHighlight">@color/ticker_accent</item>
+        <item name="android:textColorLink">@color/ticker_accent</item>
+    </style>
+
+    <style name="Ticker.CardView" parent="Base.CardView"/>
 </resources>

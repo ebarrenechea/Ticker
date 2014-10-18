@@ -22,16 +22,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
-    style="@style/Ticker.Widget.CardView">
+    style="@style/Ticker.CardView">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/padding_small"
-        android:orientation="vertical">
+        android:background="?android:attr/selectableItemBackground">
 
-        <TextView
+    <TextView
             android:id="@+id/text_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

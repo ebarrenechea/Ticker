@@ -28,4 +28,5 @@
     <!--<dimen name="padding_largest">32dp</dimen>-->
 
     <dimen name="cardview_corner_radius">1dp</dimen>
+    <dimen name="cardview_elevation">4dp</dimen>
 </resources>
