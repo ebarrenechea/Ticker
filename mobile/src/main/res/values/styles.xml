@@ -19,14 +19,16 @@
     <!-- Base application theme. -->
     <style name="Ticker" parent="Theme.AppCompat.Light.NoActionBar">
     <!-- colorPrimary is used for the default action bar background -->
-        <item name="colorPrimary">#556677</item>
+        <item name="colorPrimary">@color/primary</item>
 
         <!-- colorPrimaryDark is used for the status bar -->
-        <item name="colorPrimaryDark">#334455</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
 
         <!-- colorAccent is used as the default value for colorControlActivated
              which is used to tint widgets -->
-        <item name="colorAccent">#665544</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="colorControlHighlight">@color/accent</item>
     </style>
 
     <style name="Ticker.Widget"/>
