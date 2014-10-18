@@ -22,8 +22,6 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <uses-sdk tools:node="replace"/>
-
     <application
         android:name=".TickerApp"
         android:allowBackup="true"
