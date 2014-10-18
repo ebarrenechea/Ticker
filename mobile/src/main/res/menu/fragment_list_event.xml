@@ -17,6 +17,7 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".MainActivity">
 
@@ -24,26 +25,27 @@
         android:id="@+id/action_search"
         android:title="@string/search_events"
         android:icon="@drawable/ic_action_search"
-        android:showAsAction="collapseActionView|ifRoom"
-        android:actionViewClass="ca.barrenechea.ticker.widget.SearchView"/>
+        app:showAsAction="collapseActionView|always"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
 
     <item
         android:id="@+id/action_add"
         android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/add"/>
+        android:title="@string/add"
+        app:showAsAction="never"/>
 
     <item
         android:orderInCategory="100"
         android:title="@string/sort"
-        android:showAsAction="ifRoom"
-        android:icon="@drawable/ic_action_sort">
+        android:icon="@drawable/ic_action_sort"
+        app:showAsAction="ifRoom">
 
         <menu android:checkableBehavior="single">
             <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/sort_start_asc"
-                    android:title="@string/time_ascending"/>
+                    android:title="@string/time_ascending"
+                    android:checked="true"/>
                 <item
                     android:id="@+id/sort_start_desc"
                     android:title="@string/time_descending"/>

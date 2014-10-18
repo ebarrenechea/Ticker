@@ -17,8 +17,8 @@
 package ca.barrenechea.ticker.app;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 
 import com.squareup.otto.Bus;
 
@@ -27,7 +27,7 @@ import javax.inject.Inject;
 import ca.barrenechea.ticker.TickerApp;
 
 @SuppressLint("Registered")
-public class BaseActivity extends Activity {
+public class BaseActivity extends ActionBarActivity {
 
     @Inject
     Bus mBus;

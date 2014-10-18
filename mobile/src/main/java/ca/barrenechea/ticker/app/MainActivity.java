@@ -16,25 +16,35 @@
 
 package ca.barrenechea.ticker.app;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.Toolbar;
 
 import com.squareup.otto.Subscribe;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.event.OnEventView;
 import ca.barrenechea.ticker.ui.EventListFragment;
 
 public class MainActivity extends BaseActivity {
 
+    @InjectView(R.id.toolbar)
+    Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentManager manager = this.getFragmentManager();
+        ButterKnife.inject(this);
+
+        setSupportActionBar(mToolbar);
+
+        FragmentManager manager = this.getSupportFragmentManager();
         Fragment f = manager.findFragmentById(R.id.frame_content);
 
         if (f == null) {
