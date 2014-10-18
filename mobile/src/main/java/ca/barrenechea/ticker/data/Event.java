@@ -25,6 +25,8 @@ import io.realm.annotations.RealmClass;
 @RealmClass
 public class Event extends RealmObject {
     @Ignore
+    public static final String COLUMN_ID = "id";
+    @Ignore
     public static final String COLUMN_NAME = "name";
     @Ignore
     public static final String COLUMN_START = "started";

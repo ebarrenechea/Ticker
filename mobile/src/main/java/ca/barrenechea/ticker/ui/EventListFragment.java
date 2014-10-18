@@ -34,24 +34,21 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
-import ca.barrenechea.ticker.data.EventLoader;
 import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.EventAdapter;
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import rx.Observable;
-import rx.Observer;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class EventListFragment extends BaseFragment implements Observer<RealmResults<Event>> {
+public class EventListFragment extends BaseFragment implements RealmChangeListener {
 
     private static final String TAG = "EventListFragment";
 
@@ -64,10 +61,9 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
     @InjectView(R.id.text_empty)
     TextView mTextEmpty;
 
-    @Inject
-    EventLoader mEventLoader;
+    private boolean mRegistered = false;
+    private boolean mSortOrder = RealmResults.SORT_ORDER_ASCENDING;
 
-    private Subscription mSubscription;
     private EventAdapter mAdapter;
     private SearchView mSearchView;
 
@@ -126,8 +122,13 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
                 }
 
                 private void search(String s) {
-                    final RealmQuery<Event> query = mEventLoader.getQuery();
-                    reloadData(query.contains("name", s));
+                    loadData(subscriber -> {
+                        Realm realm = Realm.getInstance(getActivity());
+                        RealmQuery<Event> query = realm.where(Event.class).contains(Event.COLUMN_NAME, s, false);
+
+                        subscriber.onNext(query.findAll());//.sort(Event.COLUMN_NAME, RealmResults.SORT_ORDER_ASCENDING));
+                        subscriber.onCompleted();
+                    });
                 }
             });
 
@@ -157,13 +158,15 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
                 return true;
 
             case R.id.sort_start_asc:
-                sortBy(Event.COLUMN_START, RealmResults.SORT_ORDER_ASCENDING);
                 item.setChecked(true);
+                mSortOrder = RealmResults.SORT_ORDER_ASCENDING;
+                loadData();
                 return true;
 
             case R.id.sort_start_desc:
-                sortBy(Event.COLUMN_START, RealmResults.SORT_ORDER_DECENDING);
                 item.setChecked(true);
+                mSortOrder = RealmResults.SORT_ORDER_DECENDING;
+                loadData();
                 return true;
 
             default:
@@ -171,68 +174,57 @@ public class EventListFragment extends BaseFragment implements Observer<RealmRes
         }
     }
 
-    private void sortBy(String column, boolean ascending) {
-        final RealmResults<Event> data = mAdapter.getData();
-        Observable
-                .create(s -> {
-                    if (data != null && data.size() > 0) {
-                        s.onNext(data.sort(column, ascending));
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(d -> mAdapter.setData((RealmResults<Event>) d))
-                .subscribe();
-    }
-
     @Override
     public void onResume() {
         super.onResume();
-        reloadData(null);
+        loadData();
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        resetSubscription();
+        Realm.getInstance(this.getActivity()).removeChangeListener(this);
+        mRegistered = false;
     }
 
-    private void reloadData(RealmQuery<Event> query) {
-        resetSubscription();
-        if (query == null) {
-            query = mEventLoader.getQuery();
-        }
+    private void loadData() {
+        loadData(subscriber -> {
+            Realm realm = Realm.getInstance(this.getActivity());
+            RealmQuery<Event> query = realm.where(Event.class);
 
-        mSubscription = mEventLoader.load(query).subscribe(this);
+            subscriber.onNext(query.findAll().sort(Event.COLUMN_START, mSortOrder));
+            subscriber.onCompleted();
+        });
     }
 
-    private void resetSubscription() {
-        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
-            mSubscription.unsubscribe();
-        }
-
-        mSubscription = null;
+    private void loadData(Observable.OnSubscribe<RealmResults<Event>> subscriber) {
+        Observable.create(subscriber)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(t -> Log.e(TAG, "Error loading list data!", t))
+                .doOnNext(results ->
+                {
+                    if (results.size() == 0) {
+                        showEmpty();
+                    } else {
+                        mAdapter.setData(results);
+                        showList();
+                    }
+                })
+                .doOnCompleted(
+                        () -> {
+                            if (!mRegistered) {
+                                mRegistered = true;
+                                Realm.getInstance(this.getActivity()).addChangeListener(this);
+                            }
+                        })
+                .subscribe();
     }
 
     @Override
-    public void onCompleted() {
-        // do nothing
-    }
-
-    @Override
-    public void onError(Throwable e) {
-        Log.e(TAG, "Error loading data.", e);
-    }
-
-    @Override
-    public void onNext(RealmResults<Event> results) {
-        if (results.size() > 0) {
-            mAdapter.setData(results);
-            showList();
-        } else {
-            showEmpty();
-        }
+    public void onChange() {
+        loadData();
     }
 
     private void showList() {

@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,24 +30,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import javax.inject.Inject;
+import org.joda.time.DateTime;
+
+import java.util.UUID;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
-import ca.barrenechea.ticker.data.EventLoader;
+import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.utils.ViewUtils;
+import io.realm.Realm;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class CreateEventDialog extends BaseDialog {
+    private static final String TAG = "CreateEventDialog";
     private static final int ANIMATION_DELAY = 325;
 
     @InjectView(R.id.edit_name)
     EditText mEditName;
     @InjectView(R.id.button_positive)
     Button mButtonPositive;
-
-    @Inject
-    EventLoader mEventLoader;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -94,8 +99,33 @@ public class CreateEventDialog extends BaseDialog {
             final String name = mEditName.getText().toString();
 
             if (!TextUtils.isEmpty(name)) {
-                mEventLoader.create(name, null);
-                Toast.makeText(this.getActivity(), R.string.event_created, Toast.LENGTH_SHORT).show();
+                Observable.create(
+                        subscriber -> {
+                            Realm realm = Realm.getInstance(this.getActivity());
+                            realm.beginTransaction();
+
+                            final Event e = realm.createObject(Event.class);
+                            e.setId(UUID.randomUUID().toString());
+                            e.setName(name);
+
+                            long milli = new DateTime().withMillisOfSecond(0).getMillis();
+                            e.setCreated(milli);
+                            e.setStarted(milli);
+
+                            realm.commitTransaction();
+
+                            subscriber.onCompleted();
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnError(t -> Log.e(TAG, "Error creating event.", t))
+                        .doOnCompleted(
+                                () -> {
+                                    this.dismiss();
+                                    Toast.makeText(this.getActivity(), R.string.event_created, Toast.LENGTH_SHORT).show();
+                                }
+                        )
+                        .subscribe();
             } else {
                 Toast.makeText(this.getActivity(), R.string.event_not_created, Toast.LENGTH_SHORT).show();
             }
