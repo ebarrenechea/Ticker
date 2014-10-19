@@ -61,11 +61,12 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
     @InjectView(R.id.text_empty)
     TextView mTextEmpty;
 
+    private String mSearchQuery;
+    private boolean mSearchOpen = false;
     private boolean mRegistered = false;
     private boolean mSortOrder = RealmResults.SORT_ORDER_ASCENDING;
 
     private EventAdapter mAdapter;
-    private SearchView mSearchView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -106,9 +107,9 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
         inflater.inflate(R.menu.fragment_list_event, menu);
 
         MenuItem search = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(search);
-        if (mSearchView != null) {
-            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(search);
+        if (searchView != null) {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
                     search(s);
@@ -122,6 +123,7 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
                 }
 
                 private void search(String s) {
+                    mSearchQuery = s;
                     loadData(subscriber -> {
                         Realm realm = Realm.getInstance(getActivity());
                         RealmQuery<Event> query = realm.where(Event.class).contains(Event.COLUMN_NAME, s, false);
@@ -135,12 +137,15 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
             MenuItemCompat.setOnActionExpandListener(search, new MenuItemCompat.OnActionExpandListener() {
                 @Override
                 public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                    mSearchOpen = true;
                     resetEmptyText();
                     return true;
                 }
 
                 @Override
                 public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                    mSearchOpen = false;
+                    mSearchQuery = null;
                     resetEmptyText();
                     return true;
                 }
@@ -258,15 +263,13 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
     }
 
     private void resetEmptyText() {
-        if (mSearchView == null || mSearchView.isIconified()) {
+        if (!mSearchOpen) {
             mTextEmpty.setText(R.string.no_events);
         } else {
-            final CharSequence search = mSearchView.getQuery();
-
-            if (TextUtils.isEmpty(search)) {
+            if (TextUtils.isEmpty(mSearchQuery)) {
                 mTextEmpty.setText(R.string.empty_search);
             } else {
-                final String msg = String.format(Locale.getDefault(), this.getString(R.string.nothing_found), search);
+                final String msg = String.format(Locale.getDefault(), this.getString(R.string.nothing_found), mSearchQuery);
                 mTextEmpty.setText(msg);
             }
         }
