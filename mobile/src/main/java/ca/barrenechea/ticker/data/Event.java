@@ -20,9 +20,7 @@ import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.Index;
-import io.realm.annotations.RealmClass;
 
-@RealmClass
 public class Event extends RealmObject {
     @Ignore
     public static final String COLUMN_ID = "id";
@@ -38,7 +36,7 @@ public class Event extends RealmObject {
     private long created;
     private long started = -1;
     private String note;
-    private RealmList<HistoryEntry> listHistory;
+    private RealmList<Episode> episodes;
 
     public void setId(String id) {
         this.id = id;
@@ -80,11 +78,11 @@ public class Event extends RealmObject {
         this.note = note;
     }
 
-    public RealmList<HistoryEntry> getListHistory() {
-        return listHistory;
+    public RealmList<Episode> getEpisodes() {
+        return episodes;
     }
 
-    public void setListHistory(RealmList<HistoryEntry> listHistory) {
-        this.listHistory = listHistory;
+    public void setEpisodes(RealmList<Episode> episodes) {
+        this.episodes = episodes;
     }
 }

@@ -21,10 +21,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,8 +42,7 @@ import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.event.OnEventDelete;
 import ca.barrenechea.ticker.event.OnEventEdit;
-import ca.barrenechea.ticker.utils.ViewUtils;
-import ca.barrenechea.ticker.widget.HistoryAdapter;
+import ca.barrenechea.ticker.widget.EpisodeAdapter;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmQuery;
@@ -52,7 +51,8 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class EventFragment extends BaseFragment implements RealmChangeListener {
+public class EventFragment extends BaseFragment implements RealmChangeListener, View.OnClickListener,
+        Toolbar.OnMenuItemClickListener {
 
     private static final String TAG = "EventFragment";
 
@@ -64,6 +64,8 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
 
     private static enum Status {CANCELLED, SUCCESS, FAILURE}
 
+    @InjectView(R.id.toolbar)
+    Toolbar mToolbar;
     @InjectView(R.id.text_name)
     TextView mTextName;
     @InjectView(R.id.text_note)
@@ -81,73 +83,10 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
 
     private String mId;
     private boolean mIsDirty = false;
+    private boolean mIsEditing = false;
 
-    private HistoryAdapter mAdapter;
+    private EpisodeAdapter mAdapter;
     private Event mEvent;
-    private ActionMode mActionMode;
-    private ActionMode.Callback mCallback = new ActionMode.Callback() {
-
-        private Status mEditState;
-
-        @Override
-        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-            if (mActionMode == null) {
-                mActionMode = actionMode;
-                mEditState = Status.CANCELLED;
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            MenuInflater inflater = actionMode.getMenuInflater();
-            inflater.inflate(R.menu.actionmode_event, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            if (menuItem.getItemId() == R.id.action_save) {
-                if (saveEdit()) {
-                    mEditState = Status.SUCCESS;
-                } else {
-                    mEditState = Status.FAILURE;
-                }
-
-                actionMode.finish();
-                transitionViews(false);
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode actionMode) {
-            mActionMode = null;
-
-            int message = 0;
-            switch (mEditState) {
-                case FAILURE:
-                    message = R.string.event_not_saved;
-                    resetForm();
-                    break;
-                case CANCELLED:
-                    message = R.string.changes_discarded;
-                    resetForm();
-                    break;
-                case SUCCESS:
-                    message = R.string.event_saved;
-                    break;
-            }
-
-            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-            transitionViews(false);
-
-            ViewUtils.hideSoftInput(mEditName);
-        }
-    };
 
     public static EventFragment newInstance(String id) {
         Bundle args = new Bundle();
@@ -169,8 +108,6 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
         }
 
         mId = args.getString(KEY_ID);
-
-        this.setHasOptionsMenu(true);
     }
 
     @Override
@@ -179,10 +116,16 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
 
         ButterKnife.inject(this, view);
 
+        mToolbar.setNavigationIcon(R.drawable.ic_navigation_back);
+        mToolbar.setNavigationOnClickListener(this);
+
+        mToolbar.setOnMenuItemClickListener(this);
+        mToolbar.inflateMenu(R.menu.fragment_event);
+
         mTextName.setOnClickListener(v -> startEdit(mEditName));
         mTextNote.setOnClickListener(v -> startEdit(mEditNote));
 
-        mAdapter = new HistoryAdapter(getActivity(), null);
+        mAdapter = new EpisodeAdapter(getActivity());
         mListView.setAdapter(mAdapter);
         mListView.setEmptyView(mEmptyView);
 
@@ -203,21 +146,31 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
                 mBus.post(new OnEventDelete(mEvent.getId()));
                 return true;
 
             case R.id.action_reset:
-                //TODO: re-enable event reset
+                if (mIsEditing) {
+                    int message = R.string.changes_discarded;
+                    if (saveEdit()) {
+                        message = R.string.event_saved;
+                    }
+
+                    transitionViews(false);
+                    Toast.makeText(this.getActivity(), message, Toast.LENGTH_LONG).show();
+                } else {
+                    //TODO: re-enable event reset
 //                mEvent.reset();
+                }
                 mIsDirty = true;
                 bindEventData();
                 return true;
 
             default:
-                return super.onOptionsItemSelected(item);
+                return false;
         }
     }
 
@@ -253,7 +206,19 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
         }
     }
 
+    @Override
+    public void onClick(View v) {
+        if (mIsEditing) {
+            resetForm();
+            transitionViews(false);
+            Toast.makeText(this.getActivity(), R.string.event_not_saved, Toast.LENGTH_LONG).show();
+        } else {
+            this.getActivity().onBackPressed();
+        }
+    }
+
     private void transitionViews(final boolean editing) {
+        mIsEditing = editing;
         final ObjectAnimator hideName = ObjectAnimator.ofFloat(mTextName, "alpha", editing ? 0 : 1);
         final ObjectAnimator hideNote = ObjectAnimator.ofFloat(mTextNote, "alpha", editing ? 0 : 1);
         final ObjectAnimator editName = ObjectAnimator.ofFloat(mEditName, "alpha", editing ? 1 : 0);
@@ -268,8 +233,6 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
                 if (editing) {
                     mTextName.setVisibility(View.INVISIBLE);
                     mTextNote.setVisibility(View.INVISIBLE);
-
-                    getActivity().startActionMode(mCallback);
                 } else {
                     mEditName.setVisibility(View.INVISIBLE);
                     mEditNote.setVisibility(View.INVISIBLE);
@@ -308,7 +271,7 @@ public class EventFragment extends BaseFragment implements RealmChangeListener {
                                 if (item instanceof Event) {
                                     mEvent = (Event) item;
                                     bindEventData();
-                                    mAdapter.setEvent(mEvent);
+                                    mAdapter.setData(mEvent.getEpisodes());
                                 }
                             }
                         })

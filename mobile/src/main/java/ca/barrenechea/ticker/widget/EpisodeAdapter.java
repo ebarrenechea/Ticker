@@ -25,55 +25,55 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
-import ca.barrenechea.ticker.data.Event;
-import ca.barrenechea.ticker.data.HistoryEntry;
+import ca.barrenechea.ticker.data.Episode;
 import ca.barrenechea.ticker.data.TimeSpan;
 import ca.barrenechea.ticker.utils.TimeUtils;
 
-public class HistoryAdapter extends BaseAdapter {
+public class EpisodeAdapter extends BaseAdapter {
 
     private Context mContext;
-    private Event mEvent;
     private LayoutInflater mInflater;
+    private List<Episode> mList;
 
-    public HistoryAdapter(Context context, Event event) {
+    public EpisodeAdapter(Context context) {
         mContext = context;
-        mEvent = event;
         mInflater = LayoutInflater.from(context);
     }
 
-    public void setEvent(Event event) {
-        mEvent = event;
+    public void setData(List<Episode> data) {
+        mList = data;
         this.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        if (mEvent != null) {
-            return mEvent.getListHistory().size();
+        if (mList != null) {
+            return mList.size();
         } else {
             return 0;
         }
     }
 
     @Override
-    public HistoryEntry getItem(int i) {
-        return mEvent.getListHistory().get(i);
+    public Episode getItem(int i) {
+        return mList.get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return mEvent.getListHistory().get(i).getStart();
+        return mList.get(i).getStart();
     }
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder h = null;
         if (view == null) {
-            view = mInflater.inflate(R.layout.adapter_item_history, viewGroup, false);
+            view = mInflater.inflate(R.layout.adapter_item_episode, viewGroup, false);
 
             h = new ViewHolder(view);
             view.setTag(h);
@@ -83,10 +83,12 @@ public class HistoryAdapter extends BaseAdapter {
             h = (ViewHolder) view.getTag();
         }
 
-        HistoryEntry entry = mEvent.getListHistory().get(i);
-        h.start.setText(DateUtils.formatDateTime(mContext, entry.getStart(), DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME));
+        final Episode entry = mList.get(i);
+        final long start = entry.getStart();
+        final long end = start + entry.getDuration();
+        h.start.setText(DateUtils.formatDateTime(mContext, start, DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME));
 
-        TimeSpan s = TimeUtils.getSpan(entry.getStart(), entry.getEnd());
+        TimeSpan s = TimeUtils.getSpan(start, end);
         h.end.setText(String.valueOf(s.days) + " days " + String.valueOf(s.hours) + ":" + String.valueOf(s.minutes));
 
         final String note = entry.getNote();

@@ -18,17 +18,17 @@ package ca.barrenechea.ticker.data;
 
 import io.realm.RealmObject;
 
-public class HistoryEntry extends RealmObject {
+public class Episode extends RealmObject {
     private long start;
-    private long end;
+    private long duration;
     private String note;
 
     public void setStart(long start) {
         this.start = start;
     }
 
-    public void setEnd(long end) {
-        this.end = end;
+    public void setDuration(long duration) {
+        this.duration = duration;
     }
 
     public void setNote(String note) {
@@ -39,8 +39,8 @@ public class HistoryEntry extends RealmObject {
         return start;
     }
 
-    public long getEnd() {
-        return end;
+    public long getDuration() {
+        return duration;
     }
 
     public String getNote() {
