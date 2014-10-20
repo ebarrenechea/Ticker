@@ -26,8 +26,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +39,6 @@ import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.event.OnEventDelete;
-import ca.barrenechea.ticker.event.OnEventEdit;
 import ca.barrenechea.ticker.widget.EpisodeAdapter;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -62,7 +59,9 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     private static final int FLAGS = DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_TIME
             | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
 
-    private static enum Status {CANCELLED, SUCCESS, FAILURE}
+    private String mName;
+    private String mNote;
+    private long mStart;
 
     @InjectView(R.id.toolbar)
     Toolbar mToolbar;
@@ -86,7 +85,8 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     private boolean mIsEditing = false;
 
     private EpisodeAdapter mAdapter;
-    private Event mEvent;
+
+    private MenuItem mMenu;
 
     public static EventFragment newInstance(String id) {
         Bundle args = new Bundle();
@@ -122,6 +122,8 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         mToolbar.setOnMenuItemClickListener(this);
         mToolbar.inflateMenu(R.menu.fragment_event);
 
+        mMenu = mToolbar.getMenu().findItem(R.id.action_reset);
+
         mTextName.setOnClickListener(v -> startEdit(mEditName));
         mTextNote.setOnClickListener(v -> startEdit(mEditNote));
 
@@ -140,23 +142,17 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_event, menu);
-    }
-
-    @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
-                mBus.post(new OnEventDelete(mEvent.getId()));
+                mBus.post(new OnEventDelete(mId));
                 return true;
 
             case R.id.action_reset:
                 if (mIsEditing) {
                     int message = R.string.changes_discarded;
                     if (saveEdit()) {
-                        message = R.string.event_saved;
+                        message = R.string.changes_saved;
                     }
 
                     transitionViews(false);
@@ -189,7 +185,7 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         Realm.getInstance(this.getActivity()).removeChangeListener(this);
 
         if (mIsDirty) {
-            mBus.post(new OnEventEdit(mEvent.getId()));
+//            mBus.post(new OnEventEdit(mId));
             mIsDirty = false;
         }
     }
@@ -200,10 +196,10 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     }
 
     private void startEdit(View view) {
-        if (mEvent != null) {
+//        if (mEvent != null) {
             transitionViews(true);
             view.requestFocus();
-        }
+//        }
     }
 
     @Override
@@ -211,7 +207,7 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         if (mIsEditing) {
             resetForm();
             transitionViews(false);
-            Toast.makeText(this.getActivity(), R.string.event_not_saved, Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getActivity(), R.string.changes_not_saved, Toast.LENGTH_LONG).show();
         } else {
             this.getActivity().onBackPressed();
         }
@@ -233,9 +229,11 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
                 if (editing) {
                     mTextName.setVisibility(View.INVISIBLE);
                     mTextNote.setVisibility(View.INVISIBLE);
+                    mMenu.setIcon(R.drawable.ic_action_accept);
                 } else {
                     mEditName.setVisibility(View.INVISIBLE);
                     mEditNote.setVisibility(View.INVISIBLE);
+                    mMenu.setIcon(R.drawable.ic_action_reset);
                 }
             }
         });
@@ -269,9 +267,11 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
                             if (o instanceof RealmResults) {
                                 final Object item = ((RealmResults) o).first();
                                 if (item instanceof Event) {
-                                    mEvent = (Event) item;
+                                    Event e = (Event) item;
+                                    mName = e.getName();
+                                    mNote = e.getNote();
+                                    mStart = e.getStarted();
                                     bindEventData();
-                                    mAdapter.setData(mEvent.getEpisodes());
                                 }
                             }
                         })
@@ -287,38 +287,34 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
             return false;
         }
 
-        mEvent.setName(name.toString());
-        mEvent.setNote(note.toString());
-        mBus.post(new OnEventEdit(mEvent.getId()));
+        mName = name.toString();
+        mNote = note.toString();
 
         return true;
     }
 
     private void resetForm() {
         mEditName.setText("");
-        mEditName.append(mEvent.getName());
+        mEditName.append(mName);
 
-        final String note = mEvent.getNote();
-        if (!TextUtils.isEmpty(note)) {
+        if (!TextUtils.isEmpty(mNote)) {
             mEditNote.setText("");
-            mEditNote.append(note);
+            mEditNote.append(mNote);
         }
     }
 
     private void bindEventData() {
-        final String name = mEvent.getName();
-        mTextName.setText(name);
+        mTextName.setText(mName);
         mEditName.setText("");
-        mEditName.append(name);
+        mEditName.append(mName);
 
-        final String note = mEvent.getNote();
-        if (!TextUtils.isEmpty(note)) {
-            mTextNote.setText(note);
+        if (!TextUtils.isEmpty(mNote)) {
+            mTextNote.setText(mNote);
             mEditNote.setText("");
-            mEditNote.append(note);
+            mEditNote.append(mNote);
         }
 
-        mTextTime.setText(DateUtils.formatDateTime(getActivity(), mEvent.getStarted(), FLAGS));
+        mTextTime.setText(DateUtils.formatDateTime(getActivity(), mStart, FLAGS));
         mAdapter.notifyDataSetChanged();
     }
 }

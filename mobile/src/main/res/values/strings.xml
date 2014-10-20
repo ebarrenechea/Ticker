@@ -36,8 +36,8 @@
     <string name="no_events">No events yet!</string>
     <string name="nothing_found">No matches for \'%s\'</string>
     <string name="changes_discarded">Changes discarded</string>
-    <string name="event_not_saved">Event not saved</string>
-    <string name="event_saved">Event saved</string>
+    <string name="changes_not_saved">Changes not saved</string>
+    <string name="changes_saved">Changes saved</string>
     <string name="event_created">Event created</string>
     <string name="event_not_created">Event not created</string>
     <string name="create_event">Create Event</string>
