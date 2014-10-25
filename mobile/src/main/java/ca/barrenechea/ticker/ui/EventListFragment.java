@@ -23,7 +23,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,13 +43,8 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class EventListFragment extends BaseFragment implements RealmChangeListener {
-
-    private static final String TAG = "EventListFragment";
 
     @InjectView(R.id.list)
     RecyclerView mRecyclerView;
@@ -63,7 +57,6 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
 
     private String mSearchQuery;
     private boolean mSearchOpen = false;
-    private boolean mRegistered = false;
     private boolean mSortOrder = RealmResults.SORT_ORDER_ASCENDING;
 
     private EventAdapter mAdapter;
@@ -95,7 +88,7 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mAdapter = new EventAdapter(getActivity(), mBus);
+        mAdapter = new EventAdapter(this.getActivity(), mBus);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false));
@@ -124,13 +117,7 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
 
                 private void search(String s) {
                     mSearchQuery = s;
-                    loadData(subscriber -> {
-                        Realm realm = Realm.getInstance(getActivity());
-                        RealmQuery<Event> query = realm.where(Event.class).contains(Event.COLUMN_NAME, s, false);
-
-                        subscriber.onNext(query.findAll());//.sort(Event.COLUMN_NAME, RealmResults.SORT_ORDER_ASCENDING));
-                        subscriber.onCompleted();
-                    });
+                    loadData();
                 }
             });
 
@@ -165,13 +152,13 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
             case R.id.sort_start_asc:
                 item.setChecked(true);
                 mSortOrder = RealmResults.SORT_ORDER_ASCENDING;
-                loadData();
+                sort();
                 return true;
 
             case R.id.sort_start_desc:
                 item.setChecked(true);
                 mSortOrder = RealmResults.SORT_ORDER_DECENDING;
-                loadData();
+                sort();
                 return true;
 
             default:
@@ -182,6 +169,8 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
     @Override
     public void onResume() {
         super.onResume();
+
+        Realm.getInstance(this.getActivity()).addChangeListener(this);
         loadData();
     }
 
@@ -190,46 +179,38 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
         super.onPause();
 
         Realm.getInstance(this.getActivity()).removeChangeListener(this);
-        mRegistered = false;
     }
 
     private void loadData() {
-        loadData(subscriber -> {
-            Realm realm = Realm.getInstance(this.getActivity());
-            RealmQuery<Event> query = realm.where(Event.class);
+        final Realm realm = Realm.getInstance(this.getActivity());
 
-            subscriber.onNext(query.findAll().sort(Event.COLUMN_START, mSortOrder));
-            subscriber.onCompleted();
-        });
+        RealmQuery<Event> query = realm.where(Event.class);
+
+        if (mSearchOpen) {
+            query = query.contains(Event.COLUMN_NAME, mSearchQuery);
+        }
+
+        mAdapter.setData(query.findAll().sort(Event.COLUMN_START, mSortOrder));
+        displayData();
     }
 
-    private void loadData(Observable.OnSubscribe<RealmResults<Event>> subscriber) {
-        Observable.create(subscriber)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(t -> Log.e(TAG, "Error loading list data!", t))
-                .doOnNext(results ->
-                {
-                    if (results.size() == 0) {
-                        showEmpty();
-                    } else {
-                        mAdapter.setData(results);
-                        showList();
-                    }
-                })
-                .doOnCompleted(
-                        () -> {
-                            if (!mRegistered) {
-                                mRegistered = true;
-                                Realm.getInstance(this.getActivity()).addChangeListener(this);
-                            }
-                        })
-                .subscribe();
+    private void sort() {
+        mAdapter.sort(Event.COLUMN_START, mSortOrder);
+    }
+
+    private void displayData() {
+        mAdapter.notifyDataSetChanged();
+
+        if (mAdapter.getItemCount() > 0) {
+            showList();
+        } else {
+            showEmpty();
+        }
     }
 
     @Override
     public void onChange() {
-        loadData();
+        displayData();
     }
 
     private void showList() {
