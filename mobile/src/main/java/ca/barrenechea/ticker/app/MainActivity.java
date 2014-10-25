@@ -27,6 +27,7 @@ import com.squareup.otto.Subscribe;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
+import ca.barrenechea.ticker.event.OnEventEdit;
 import ca.barrenechea.ticker.event.OnEventView;
 import ca.barrenechea.ticker.ui.EventListFragment;
 
@@ -54,11 +55,20 @@ public class MainActivity extends BaseActivity {
     }
 
     @Subscribe
+    public void notify(OnEventEdit e) {
+        this.startEventActivity(e.id);
+    }
+
+    @Subscribe
     public void notify(OnEventView e) {
+        this.startEventActivity(e.id);
+    }
+
+    private void startEventActivity(String id) {
         Intent intent = new Intent(this, EventActivity.class);
 
-        if (e.id != null) {
-            intent.putExtra(EventActivity.KEY_ID, e.id);
+        if (id != null) {
+            intent.putExtra(EventActivity.KEY_ID, id);
         }
 
         this.startActivity(intent);

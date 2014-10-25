@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,24 +33,24 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.joda.time.DateTime;
+
+import java.util.UUID;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
-import ca.barrenechea.ticker.event.OnEventDelete;
+import ca.barrenechea.ticker.event.OnEventClose;
 import ca.barrenechea.ticker.widget.EpisodeAdapter;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class EventFragment extends BaseFragment implements RealmChangeListener, View.OnClickListener,
-        Toolbar.OnMenuItemClickListener {
-
-    private static final String TAG = "EventFragment";
+public class EventFragment extends BaseFragment implements RealmChangeListener, Toolbar.OnMenuItemClickListener {
 
     private static final long DURATION = 175;
     private static final String KEY_ID = "Event.Id";
@@ -59,8 +58,9 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     private static final int FLAGS = DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_TIME
             | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
 
+    private Event mEvent;
     private String mName;
-    private String mNote;
+    private String mNote = "";
     private long mStart;
 
     @InjectView(R.id.toolbar)
@@ -79,6 +79,8 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     ListView mListView;
     @InjectView(R.id.empty)
     View mEmptyView;
+
+    private Realm mRealm;
 
     private String mId;
     private boolean mIsDirty = false;
@@ -103,11 +105,11 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args == null) {
-            throw new IllegalArgumentException("Event id cannot be null!");
+        if (args != null) {
+            mId = args.getString(KEY_ID);
         }
 
-        mId = args.getString(KEY_ID);
+        mStart = DateTime.now().withMillisOfSecond(0).getMillis();
     }
 
     @Override
@@ -116,8 +118,15 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
 
         ButterKnife.inject(this, view);
 
-        mToolbar.setNavigationIcon(R.drawable.ic_navigation_back);
-        mToolbar.setNavigationOnClickListener(this);
+        mToolbar.setNavigationOnClickListener(v -> {
+            if (mIsEditing && (mEvent != null || mIsDirty)) {
+                resetViews();
+                transitionViews(false);
+                Toast.makeText(this.getActivity(), R.string.changes_not_saved, Toast.LENGTH_LONG).show();
+            } else {
+                mBus.post(new OnEventClose());
+            }
+        });
 
         mToolbar.setOnMenuItemClickListener(this);
         mToolbar.inflateMenu(R.menu.fragment_event);
@@ -130,6 +139,14 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         mAdapter = new EpisodeAdapter(getActivity());
         mListView.setAdapter(mAdapter);
         mListView.setEmptyView(mEmptyView);
+
+        if (TextUtils.isEmpty(mId)) {
+            showForm();
+            mIsEditing = true;
+        } else {
+            hideForm();
+            mIsEditing = false;
+        }
 
         return view;
     }
@@ -145,24 +162,49 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
-                mBus.post(new OnEventDelete(mId));
+                if (!TextUtils.isEmpty(mId)) {
+                    mRealm.removeChangeListener(this);
+                    Observable.create(
+                            s -> {
+                                final Realm realm = Realm.getInstance(this.getActivity());
+                                realm.beginTransaction();
+                                RealmResults<Event> result = realm.where(Event.class)
+                                        .equalTo(Event.COLUMN_ID, mId)
+                                        .findAll();
+
+                                result.clear();
+                                realm.commitTransaction();
+
+                                s.onCompleted();
+                            })
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .doOnCompleted(() -> {
+                                mBus.post(new OnEventClose());
+                            })
+                            .subscribe();
+                } else {
+                    if (mIsDirty) {
+                        mIsDirty = false;
+                    }
+
+                    mBus.post(new OnEventClose());
+                }
                 return true;
 
             case R.id.action_reset:
                 if (mIsEditing) {
                     int message = R.string.changes_discarded;
-                    if (saveEdit()) {
+                    if (apply()) {
                         message = R.string.changes_saved;
+                        mIsDirty = true;
                     }
 
                     transitionViews(false);
                     Toast.makeText(this.getActivity(), message, Toast.LENGTH_LONG).show();
-                } else {
-                    //TODO: re-enable event reset
-//                mEvent.reset();
                 }
-                mIsDirty = true;
-                bindEventData();
+
+                setViews();
                 return true;
 
             default:
@@ -174,43 +216,54 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     public void onResume() {
         super.onResume();
 
-        loadData();
-        Realm.getInstance(this.getActivity()).addChangeListener(this);
+        mRealm = Realm.getInstance(this.getActivity());
+        mRealm.addChangeListener(this);
+        if (!TextUtils.isEmpty(mId)) {
+            mEvent = Realm.getInstance(this.getActivity())
+                    .where(Event.class)
+                    .equalTo(Event.COLUMN_ID, mId)
+                    .findFirst();
+
+            onChange();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        Realm.getInstance(this.getActivity()).removeChangeListener(this);
+        mRealm.removeChangeListener(this);
 
         if (mIsDirty) {
-//            mBus.post(new OnEventEdit(mId));
             mIsDirty = false;
+            mRealm.beginTransaction();
+            if (mEvent == null) {
+                mEvent = mRealm.createObject(Event.class);
+            }
+
+            mEvent.setId(UUID.randomUUID().toString());
+            mEvent.setName(mName);
+            mEvent.setNote(mNote);
+            mEvent.setStart(mStart);
+
+            mRealm.commitTransaction();
         }
     }
 
     @Override
     public void onChange() {
-        loadData();
+        if (mEvent != null) {
+            mName = mEvent.getName();
+            mNote = mEvent.getNote();
+            mStart = mEvent.getStart();
+
+            this.setViews();
+        }
     }
 
     private void startEdit(View view) {
-//        if (mEvent != null) {
-            transitionViews(true);
-            view.requestFocus();
-//        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (mIsEditing) {
-            resetForm();
-            transitionViews(false);
-            Toast.makeText(this.getActivity(), R.string.changes_not_saved, Toast.LENGTH_LONG).show();
-        } else {
-            this.getActivity().onBackPressed();
-        }
+        transitionViews(true);
+        view.requestFocus();
     }
 
     private void transitionViews(final boolean editing) {
@@ -227,13 +280,9 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 if (editing) {
-                    mTextName.setVisibility(View.INVISIBLE);
-                    mTextNote.setVisibility(View.INVISIBLE);
-                    mMenu.setIcon(R.drawable.ic_action_accept);
+                    showForm();
                 } else {
-                    mEditName.setVisibility(View.INVISIBLE);
-                    mEditNote.setVisibility(View.INVISIBLE);
-                    mMenu.setIcon(R.drawable.ic_action_reset);
+                    hideForm();
                 }
             }
         });
@@ -251,34 +300,25 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         set.start();
     }
 
-    private void loadData() {
-        Observable.create(
-                subscriber -> {
-                    final Realm realm = Realm.getInstance(this.getActivity());
-                    RealmQuery<Event> query = realm.where(Event.class).equalTo(Event.COLUMN_ID, mId);
-
-                    subscriber.onNext(query.findAll());
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(t -> Log.e(TAG, "Error loading event.", t))
-                .doOnNext(
-                        o -> {
-                            if (o instanceof RealmResults) {
-                                final Object item = ((RealmResults) o).first();
-                                if (item instanceof Event) {
-                                    Event e = (Event) item;
-                                    mName = e.getName();
-                                    mNote = e.getNote();
-                                    mStart = e.getStarted();
-                                    bindEventData();
-                                }
-                            }
-                        })
-                .subscribe();
+    private void hideForm() {
+        mEditName.setAlpha(0f);
+        mEditNote.setAlpha(0f);
+        mEditName.setVisibility(View.INVISIBLE);
+        mEditNote.setVisibility(View.INVISIBLE);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_back);
+        mMenu.setIcon(R.drawable.ic_action_reset);
     }
 
-    private boolean saveEdit() {
+    private void showForm() {
+        mTextName.setAlpha(0f);
+        mTextNote.setAlpha(0f);
+        mTextName.setVisibility(View.INVISIBLE);
+        mTextNote.setVisibility(View.INVISIBLE);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_cancel);
+        mMenu.setIcon(R.drawable.ic_action_accept);
+    }
+
+    private boolean apply() {
         final CharSequence name = mEditName.getText();
         final CharSequence note = mEditNote.getText();
 
@@ -290,10 +330,13 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         mName = name.toString();
         mNote = note.toString();
 
+        mIsDirty = true;
+        this.setViews();
+
         return true;
     }
 
-    private void resetForm() {
+    private void resetViews() {
         mEditName.setText("");
         mEditName.append(mName);
 
@@ -303,7 +346,7 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         }
     }
 
-    private void bindEventData() {
+    private void setViews() {
         mTextName.setText(mName);
         mEditName.setText("");
         mEditName.append(mName);
@@ -312,6 +355,9 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
             mTextNote.setText(mNote);
             mEditNote.setText("");
             mEditNote.append(mNote);
+        } else {
+            mTextNote.setText("");
+            mEditNote.setText("");
         }
 
         mTextTime.setText(DateUtils.formatDateTime(getActivity(), mStart, FLAGS));

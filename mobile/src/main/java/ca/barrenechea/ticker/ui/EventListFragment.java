@@ -37,6 +37,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
+import ca.barrenechea.ticker.event.OnEventEdit;
 import ca.barrenechea.ticker.utils.ViewUtils;
 import ca.barrenechea.ticker.widget.EventAdapter;
 import io.realm.Realm;
@@ -59,6 +60,7 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
     private boolean mSearchOpen = false;
     private boolean mSortOrder = RealmResults.SORT_ORDER_ASCENDING;
 
+    private Realm mRealm;
     private EventAdapter mAdapter;
 
     @Override
@@ -145,8 +147,13 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
         int id = item.getItemId();
         switch (id) {
             case R.id.action_add:
-                CreateEventDialog d = new CreateEventDialog();
-                d.show(this.getFragmentManager(), "EditEvent");
+//                CreateEventDialog d = new CreateEventDialog();
+//                d.show(this.getFragmentManager(), "EditEvent");
+                mBus.post(new OnEventEdit(null));
+                return true;
+
+            case R.id.action_refresh:
+                loadData();
                 return true;
 
             case R.id.sort_start_asc:
@@ -170,7 +177,8 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
     public void onResume() {
         super.onResume();
 
-        Realm.getInstance(this.getActivity()).addChangeListener(this);
+        mRealm = Realm.getInstance(this.getActivity());
+        mRealm.addChangeListener(this);
         loadData();
     }
 
@@ -178,19 +186,18 @@ public class EventListFragment extends BaseFragment implements RealmChangeListen
     public void onPause() {
         super.onPause();
 
-        Realm.getInstance(this.getActivity()).removeChangeListener(this);
+        mRealm.removeChangeListener(this);
     }
 
     private void loadData() {
-        final Realm realm = Realm.getInstance(this.getActivity());
-
-        RealmQuery<Event> query = realm.where(Event.class);
+        RealmQuery<Event> query = mRealm.where(Event.class);
 
         if (mSearchOpen) {
             query = query.contains(Event.COLUMN_NAME, mSearchQuery);
         }
 
-        mAdapter.setData(query.findAll().sort(Event.COLUMN_START, mSortOrder));
+        final RealmResults<Event> data = query.findAll().sort(Event.COLUMN_START, mSortOrder);
+        mAdapter.setData(data);
         displayData();
     }
 
