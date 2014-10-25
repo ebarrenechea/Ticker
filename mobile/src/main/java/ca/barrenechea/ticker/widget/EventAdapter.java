@@ -52,7 +52,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     public void setData(RealmResults<Event> data) {
         mData = data;
-        this.notifyDataSetChanged();
+    }
+
+    public void sort(String column, boolean order) {
+        if (mData != null) {
+            mData = mData.sort(column, order);
+            this.notifyDataSetChanged();
+        }
     }
 
     public RealmResults<Event> getData() {
@@ -81,12 +87,12 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int i) {
         Event event = mData.get(i);
 
-        TimeSpan s = TimeUtils.getCurrentSpan(event.getStarted());
+        TimeSpan s = TimeUtils.getCurrentSpan(event.getStart());
 
         holder.name.setText(event.getName());
         holder.days.setText(String.valueOf(s.days));
         holder.time.setText(s.hours + ":" + (s.minutes < 10 ? "0" : "") + s.minutes);
-        holder.date.setText(DateUtils.formatDateTime(mContext, event.getStarted(), FLAGS));
+        holder.date.setText(DateUtils.formatDateTime(mContext, event.getStart(), FLAGS));
     }
 
     @Override
