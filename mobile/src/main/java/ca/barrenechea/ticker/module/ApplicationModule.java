@@ -25,7 +25,6 @@ import javax.inject.Singleton;
 import ca.barrenechea.ticker.TickerApp;
 import ca.barrenechea.ticker.app.EventActivity;
 import ca.barrenechea.ticker.app.MainActivity;
-import ca.barrenechea.ticker.ui.CreateEventDialog;
 import ca.barrenechea.ticker.ui.EventFragment;
 import ca.barrenechea.ticker.ui.EventListFragment;
 import dagger.Module;
@@ -36,7 +35,6 @@ import dagger.Provides;
                 EventActivity.class,
                 MainActivity.class,
 
-                CreateEventDialog.class,
                 EventFragment.class,
                 EventListFragment.class,
         },
