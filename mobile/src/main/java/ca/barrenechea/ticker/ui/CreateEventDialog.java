@@ -110,7 +110,7 @@ public class CreateEventDialog extends BaseDialog {
 
                             long milli = new DateTime().withMillisOfSecond(0).getMillis();
                             e.setCreated(milli);
-                            e.setStarted(milli);
+                            e.setStart(milli);
 
                             realm.commitTransaction();
 
