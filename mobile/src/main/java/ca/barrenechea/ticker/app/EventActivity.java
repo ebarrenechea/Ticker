@@ -20,13 +20,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.event.OnEventClose;
-import ca.barrenechea.ticker.event.OnEventDelete;
 import ca.barrenechea.ticker.ui.EventFragment;
 
 public class EventActivity extends BaseActivity {
@@ -56,12 +54,6 @@ public class EventActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Subscribe
-    public void notify(OnEventDelete e) {
-        Toast.makeText(this, "Event deleted", Toast.LENGTH_SHORT).show();
-        this.finish();
     }
 
     @Subscribe
