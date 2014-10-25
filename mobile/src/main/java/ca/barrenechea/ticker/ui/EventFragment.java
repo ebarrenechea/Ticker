@@ -42,7 +42,6 @@ import butterknife.InjectView;
 import ca.barrenechea.ticker.R;
 import ca.barrenechea.ticker.data.Event;
 import ca.barrenechea.ticker.event.OnEventClose;
-import ca.barrenechea.ticker.widget.EpisodeAdapter;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -85,8 +84,6 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
     private String mId;
     private boolean mIsDirty = false;
     private boolean mIsEditing = false;
-
-    private EpisodeAdapter mAdapter;
 
     private MenuItem mMenu;
 
@@ -136,8 +133,6 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         mTextName.setOnClickListener(v -> startEdit(mEditName));
         mTextNote.setOnClickListener(v -> startEdit(mEditNote));
 
-        mAdapter = new EpisodeAdapter(getActivity());
-        mListView.setAdapter(mAdapter);
         mListView.setEmptyView(mEmptyView);
 
         if (TextUtils.isEmpty(mId)) {
@@ -361,6 +356,5 @@ public class EventFragment extends BaseFragment implements RealmChangeListener, 
         }
 
         mTextTime.setText(DateUtils.formatDateTime(getActivity(), mStart, FLAGS));
-        mAdapter.notifyDataSetChanged();
     }
 }
