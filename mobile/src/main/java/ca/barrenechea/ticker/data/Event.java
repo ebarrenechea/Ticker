@@ -27,16 +27,16 @@ public class Event extends RealmObject {
     @Ignore
     public static final String COLUMN_NAME = "name";
     @Ignore
-    public static final String COLUMN_START = "started";
+    public static final String COLUMN_START = "start";
 
     @Index
     private String id;
     @Index
     private String name;
     private long created;
-    private long started = -1;
+    private long start = -1;
     private String note;
-    private RealmList<Episode> episodes;
+    private RealmList<History> history;
 
     public void setId(String id) {
         this.id = id;
@@ -62,12 +62,12 @@ public class Event extends RealmObject {
         this.created = created;
     }
 
-    public long getStarted() {
-        return started;
+    public long getStart() {
+        return start;
     }
 
-    public void setStarted(long started) {
-        this.started = started;
+    public void setStart(long start) {
+        this.start = start;
     }
 
     public String getNote() {
@@ -78,11 +78,11 @@ public class Event extends RealmObject {
         this.note = note;
     }
 
-    public RealmList<Episode> getEpisodes() {
-        return episodes;
+    public RealmList<History> getHistory() {
+        return history;
     }
 
-    public void setEpisodes(RealmList<Episode> episodes) {
-        this.episodes = episodes;
+    public void setHistory(RealmList<History> history) {
+        this.history = history;
     }
 }
